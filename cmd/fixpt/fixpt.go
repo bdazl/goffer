@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	Output     = "out/hello.gif"
+	Output     = "out/out.gif"
 	FPS        = 24
 	FrameCount = FPS * 5
 	Width      = 512
