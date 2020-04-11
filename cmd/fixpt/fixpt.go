@@ -22,6 +22,7 @@ var (
 	FrameCount = FPS * 5
 	Width      = 512
 	Height     = 512
+	Total      = 5.
 
 	// https://colorhunt.co/palette/177866
 	Palette = color.Palette{
@@ -37,6 +38,8 @@ func main() {
 	flag.IntVar(&FPS, "fps", FPS, "frames per second")
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
 	flag.Parse()
+
+	Total = float64(FrameCount) / float64(FPS)
 
 	// delay is per frame, in 100ths of a second
 	imgs := animate(FrameCount, FPS)
@@ -73,10 +76,10 @@ func frame(t float64) *image.Paletted {
 	gc.SetStrokeColor(Palette[2])
 	gc.SetLineWidth(2)
 
-	rad := TwoPi * t * 0.5
+	rad := TwoPi * t / Total
 	amp := w / 2.0
-	cosp, cosc := amp*math.Cos(rad), amp*math.Cos(rad/2.0)
-	sinp, sinc := amp*math.Sin(rad), amp*math.Sin(rad/2.0)
+	cosp, cosc := amp*math.Cos(rad)+cx, amp*math.Cos(rad/2.0)+cx
+	sinp, sinc := amp*math.Sin(rad)+cy, amp*math.Sin(rad/2.0)+cy
 
 	// Draw a closed shape
 	gc.BeginPath()
