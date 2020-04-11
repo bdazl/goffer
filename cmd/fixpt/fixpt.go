@@ -18,8 +18,8 @@ const (
 
 var (
 	Output     = "out/out.gif"
-	FPS        = 24
-	FrameCount = FPS * 5
+	FPS        = 30
+	FrameCount = FPS * 4
 	Width      = 512
 	Height     = 512
 	Total      = 5.
