@@ -2,13 +2,26 @@ package main
 
 import (
 	"flag"
-	"github.com/llgcode/draw2d/draw2dimg"
+	"fmt"
 	"image"
 	"image/color"
+	"image/gif"
+	"math"
+	"os"
+
+	"github.com/llgcode/draw2d/draw2dimg"
+)
+
+const (
+	TwoPi = math.Pi * 2.0
 )
 
 var (
-	output = "out/hello.png"
+	Output     = "out/hello.gif"
+	FPS        = 24
+	FrameCount = FPS * 5
+	Width      = 512
+	Height     = 512
 
 	// https://colorhunt.co/palette/177866
 	Palette = color.Palette{
@@ -20,31 +33,78 @@ var (
 )
 
 func main() {
-	flag.StringVar(&output, "output", output, "output file")
+	flag.StringVar(&Output, "output", Output, "output file")
+	flag.IntVar(&FPS, "fps", FPS, "frames per second")
+	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
 	flag.Parse()
 
+	// delay is per frame, in 100ths of a second
+	imgs := animate(FrameCount, FPS)
+
+	jiffy := &gif.GIF{
+		Image: imgs,
+		Delay: getDelays(len(imgs)),
+	}
+
+	ofile, err := os.Create(Output)
+	if err != nil {
+		panic(err)
+	}
+
+	err = gif.EncodeAll(ofile, jiffy)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func frame(t float64) *image.Paletted {
+	var (
+		w, h   = float64(Width), float64(Height)
+		cx, cy = w / 2.0, h / 2.0
+		bounds = image.Rect(0, 0, Width, Height)
+	)
+
 	// Initialize the graphic context on an RGBA image
-	dest := image.NewRGBA(image.Rect(0, 0, 512, 512))
-	gc := draw2dimg.NewGraphicContext(dest)
+	full := image.NewRGBA(bounds)
+	gc := draw2dimg.NewGraphicContext(full)
 
 	// Set some properties
 	gc.SetFillColor(Palette[1])
 	gc.SetStrokeColor(Palette[2])
 	gc.SetLineWidth(2)
 
+	rad := TwoPi * t * 0.5
+	amp := w / 2.0
+	cosp, cosc := amp*math.Cos(rad), amp*math.Cos(rad/2.0)
+	sinp, sinc := amp*math.Sin(rad), amp*math.Sin(rad/2.0)
+
 	// Draw a closed shape
-	gc.BeginPath()    // Initialize a new path
-	gc.MoveTo(10, 10) // Move to a position to start the new path
-	gc.LineTo(100, 50)
-	gc.QuadCurveTo(100, 10, 10, 10)
+	gc.BeginPath()
+	gc.MoveTo(cx, cy)
+	gc.LineTo(w, h/2.0)
+	gc.QuadCurveTo(cosc, sinc, cosp, sinp)
 	gc.Close()
 	gc.FillStroke()
 
-	// Save to file
-	draw2dimg.SaveToPngFile(output, toPaletted(dest, Palette))
+	return toPaletted(full, Palette)
 }
 
-func toPaletted(img image.Image, palette color.Palette) image.Image {
+func animate(count int, fps int) []*image.Paletted {
+	var (
+		ffps = float64(fps)
+		out  = make([]*image.Paletted, count)
+	)
+
+	for i := 0; i < count; i++ {
+		t := float64(i) / ffps
+		fmt.Printf("%.3fs\n", t)
+		out[i] = frame(t)
+	}
+
+	return out
+}
+
+func toPaletted(img image.Image, palette color.Palette) *image.Paletted {
 	bnds := img.Bounds()
 	out := image.NewPaletted(bnds, palette)
 
@@ -53,6 +113,15 @@ func toPaletted(img image.Image, palette color.Palette) image.Image {
 			idx := palette.Index(img.At(x, y))
 			out.SetColorIndex(x, y, uint8(idx))
 		}
+	}
+	return out
+}
+
+func getDelays(count int) []int {
+	delay := 1
+	out := make([]int, count)
+	for i := range out {
+		out[i] = delay
 	}
 	return out
 }
