@@ -121,7 +121,7 @@ func toPaletted(img image.Image, palette color.Palette) *image.Paletted {
 }
 
 func getDelays(count int) []int {
-	delay := 1
+	delay := 100 / FPS
 	out := make([]int, count)
 	for i := range out {
 		out[i] = delay
