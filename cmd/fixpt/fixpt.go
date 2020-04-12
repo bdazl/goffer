@@ -39,23 +39,14 @@ func main() {
 
 	Total = float64(FrameCount) / float64(FPS)
 
-	// delay is per frame, in 100ths of a second
 	imgs := animate(FrameCount, FPS)
 
 	jiffy := &gif.GIF{
 		Image: imgs,
-		Delay: getDelays(len(imgs)),
+		Delay: getDelays(len(imgs), FPS),
 	}
 
-	ofile, err := os.Create(Output)
-	if err != nil {
-		panic(err)
-	}
-
-	err = gif.EncodeAll(ofile, jiffy)
-	if err != nil {
-		panic(err)
-	}
+	gifOutputFile(Output, jiffy)
 }
 
 func animate(count int, fps int) []*image.Paletted {
@@ -67,13 +58,13 @@ func animate(count int, fps int) []*image.Paletted {
 	for i := 0; i < count; i++ {
 		t := float64(i) / ffps
 		fmt.Printf("%.3fs\n", t)
-		out[i] = GifEncode(Frame(t), Palette)
+		out[i] = gifFrameEncode(Frame(t), Palette)
 	}
 
 	return out
 }
 
-func GifEncode(img image.Image, palette color.Palette) *image.Paletted {
+func gifFrameEncode(img image.Image, palette color.Palette) *image.Paletted {
 	bnds := img.Bounds()
 	out := image.NewPaletted(bnds, palette)
 
@@ -86,8 +77,22 @@ func GifEncode(img image.Image, palette color.Palette) *image.Paletted {
 	return out
 }
 
-func getDelays(count int) []int {
-	delay := 100 / FPS
+func gifOutputFile(filename string, jiffy *gif.GIF) {
+	ofile, err := os.Create(Output)
+	if err != nil {
+		panic(err)
+	}
+
+	err = gif.EncodeAll(ofile, jiffy)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func getDelays(count, fps int) []int {
+	// delay is per frame, in 100ths of a second
+	delay := 100 / fps
+
 	out := make([]int, count)
 	for i := range out {
 		out[i] = delay
