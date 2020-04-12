@@ -2,27 +2,27 @@ package main
 
 import (
 	"image"
+	"image/color"
 	"math"
+	"math/rand"
 
 	"github.com/llgcode/draw2d/draw2dimg"
+	kit "github.com/llgcode/draw2d/draw2dkit"
+
+	"gonum.org/v1/gonum/spatial/r2"
 )
 
-func frameFulkonstEtt(t float64) *image.Paletted {
+type frameFulkonstOne struct{}
+
+func (f frameFulkonstOne) Init() {}
+func (f frameFulkonstOne) Frame(t float64) *image.Paletted {
 	var (
 		palette = Palette1
 		w, h    = float64(Width), float64(Height)
 		cx, cy  = w / 2.0, h / 2.0
-		bounds  = image.Rect(0, 0, Width, Height)
 	)
 
-	// Initialize the graphic context on an RGBA image
-	img := image.NewRGBA(bounds)
-	gc := draw2dimg.NewGraphicContext(img)
-
-	// Set some properties
-	gc.SetFillColor(palette[1])
-	gc.SetStrokeColor(palette[2])
-	gc.SetLineWidth(2)
+	img, gc := fulkonstCommon(palette)
 
 	rad := TwoPi * t / Total
 	amp := w / 2.0
@@ -38,4 +38,107 @@ func frameFulkonstEtt(t float64) *image.Paletted {
 	gc.FillStroke()
 
 	return gifEncodeFrame(img, palette)
+}
+
+type frameFulkonstTwo struct {
+	Graph
+}
+
+func (f *frameFulkonstTwo) Init() {
+	const (
+		subCount = 3
+		dist     = 40.0
+		hdist    = dist / 2.0
+	)
+
+	f.Graph.Nodes = []Node{
+		&FixNode{Pos: r2.Vec{X: CX + hdist, Y: CY + hdist}},
+		&FixNode{Pos: r2.Vec{X: CX - hdist, Y: CY + hdist}},
+		&FixNode{Pos: r2.Vec{X: CX - hdist, Y: CY - hdist}},
+		&FixNode{Pos: r2.Vec{X: CX + hdist, Y: CY - hdist}},
+	}
+
+	for r := 0; r < 4; r++ {
+		prevI := r
+		prevP := f.Graph.Nodes[r].P()
+		for i := 0; i < subCount; i++ {
+			newNode := &FluidNode{
+				// random direction
+				Pos: jexpV(rand.Float64(), dist, prevP.X, prevP.Y),
+				Vel: jexpV(rand.Float64(), 1.0, 0.0, 0.0),
+				StepFun: func(fn *FluidNode) {
+					// TODO
+					edges := f.Graph.GetNodeEdges(fn)
+					var me Edge
+					for _, e := range edges {
+						if e.A != fn {
+							me = e
+							break
+						}
+					}
+
+					fn.Pos = fn.Pos.Add(fn.Vel)
+					parentP := me.A.P()
+
+					// normalize lenght
+					fn.Pos = parentP.Add(normalize(fn.Pos.Sub(parentP)).Scale(me.L))
+				},
+			}
+			ni := f.Graph.AddNode(newNode)
+			f.Graph.AddEdge(prevI, ni, length(prevP, newNode.Pos))
+
+			prevI = ni
+			prevP = newNode.Pos
+		}
+	}
+}
+
+func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
+	const (
+		csiz = 5.0
+	)
+	var (
+		palette = Palette1
+	)
+
+	img, gc := fulkonstCommon(palette)
+
+	for _, e := range f.Graph.Edges {
+		a := e.A.P()
+		b := e.B.P()
+
+		gc.MoveTo(a.X, a.Y)
+		gc.LineTo(b.X, b.Y)
+		gc.Stroke()
+	}
+
+	for _, n := range f.Graph.Nodes {
+		v := n.P()
+		kit.Circle(gc, v.X, v.Y, csiz)
+		gc.FillStroke()
+
+		n.Step()
+	}
+
+	return gifEncodeFrame(img, palette)
+}
+
+func randPt(cx, cy, w, h float64) r2.Vec {
+	return r2.Vec{
+		X: rand.Float64()*w + cx/2.0,
+		Y: rand.Float64()*h + cy/2.0,
+	}
+}
+
+func fulkonstCommon(palette color.Palette) (*image.RGBA, *draw2dimg.GraphicContext) {
+	bounds := image.Rect(0, 0, Width, Height)
+	img := image.NewRGBA(bounds)
+	gc := draw2dimg.NewGraphicContext(img)
+
+	// Set some properties
+	gc.SetFillColor(palette[1])
+	gc.SetStrokeColor(palette[2])
+	gc.SetLineWidth(2)
+
+	return img, gc
 }

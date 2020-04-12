@@ -6,23 +6,25 @@ import (
 	"image"
 	"image/color"
 	"image/gif"
-	"math"
+	"math/rand"
 	"os"
+	"path"
 	"time"
 
-	"github.com/gonum/stat"
-)
-
-const (
-	TwoPi = math.Pi * 2.0
+	"gonum.org/v1/gonum/stat"
 )
 
 var (
-	Frame = frameFulkonstEtt
+	Projects = map[string]Project{
+		"fulkonstett": &frameFulkonstOne{},
+		"fulkonsttvå": &frameFulkonstTwo{},
+	}
+
+	Pstr = "fulkonsttvå"
+	P    = Projects[Pstr]
 )
 
 var (
-	Output     = "out/out.gif"
 	FPS        = 30
 	FrameCount = FPS * 4
 	Width      = 512
@@ -32,15 +34,27 @@ var (
 // calculated
 var (
 	Total = 5.
+	W     = 512.0
+	H     = 512.0
+	CX    = 512 / 2.0
+	CY    = 512 / 2.0
 )
 
+type Project interface {
+	Init()
+	Frame(t float64) *image.Paletted
+}
+
 func main() {
-	flag.StringVar(&Output, "output", Output, "output file")
 	flag.IntVar(&FPS, "fps", FPS, "frames per second")
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
 	flag.Parse()
 
+	rand.Seed(19901231)
+
 	Total = float64(FrameCount) / float64(FPS)
+	W, H = float64(Width), float64(Height)
+	CX, CY = W/2.0, H/2.0
 
 	imgs := animate(FrameCount, FPS)
 
@@ -49,7 +63,7 @@ func main() {
 		Delay: getDelays(len(imgs), FPS),
 	}
 
-	gifOutputFile(Output, jiffy)
+	gifOutputFile(path.Join("out", fmt.Sprintf("%v.gif", Pstr)), jiffy)
 }
 
 func animate(count int, fps int) []*image.Paletted {
@@ -58,12 +72,13 @@ func animate(count int, fps int) []*image.Paletted {
 		out  = make([]*image.Paletted, count)
 	)
 
+	P.Init()
 	times := make([]float64, count)
 	for i := 0; i < count; i++ {
 		t := float64(i) / ffps
 
 		start := time.Now()
-		out[i] = Frame(t)
+		out[i] = P.Frame(t)
 		meas := time.Since(start)
 
 		ms := getMs(meas)
@@ -111,11 +126,12 @@ func gifEncodeFrame(img image.Image, palette color.Palette) *image.Paletted {
 }
 
 func gifOutputFile(filename string, jiffy *gif.GIF) {
-	ofile, err := os.Create(Output)
+	ofile, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
 
+	fmt.Println("Writing to file:", filename)
 	err = gif.EncodeAll(ofile, jiffy)
 	if err != nil {
 		panic(err)
