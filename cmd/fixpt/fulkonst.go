@@ -7,11 +7,12 @@ import (
 	"github.com/llgcode/draw2d/draw2dimg"
 )
 
-func frameFulkonstEtt(t float64) image.Image {
+func frameFulkonstEtt(t float64) *image.Paletted {
 	var (
-		w, h   = float64(Width), float64(Height)
-		cx, cy = w / 2.0, h / 2.0
-		bounds = image.Rect(0, 0, Width, Height)
+		palette = Palette1
+		w, h    = float64(Width), float64(Height)
+		cx, cy  = w / 2.0, h / 2.0
+		bounds  = image.Rect(0, 0, Width, Height)
 	)
 
 	// Initialize the graphic context on an RGBA image
@@ -19,8 +20,8 @@ func frameFulkonstEtt(t float64) image.Image {
 	gc := draw2dimg.NewGraphicContext(img)
 
 	// Set some properties
-	gc.SetFillColor(Palette[1])
-	gc.SetStrokeColor(Palette[2])
+	gc.SetFillColor(palette[1])
+	gc.SetStrokeColor(palette[2])
 	gc.SetLineWidth(2)
 
 	rad := TwoPi * t / Total
@@ -36,5 +37,5 @@ func frameFulkonstEtt(t float64) image.Image {
 	gc.Close()
 	gc.FillStroke()
 
-	return img
+	return gifEncodeFrame(img, palette)
 }

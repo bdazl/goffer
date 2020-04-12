@@ -63,7 +63,7 @@ func animate(count int, fps int) []*image.Paletted {
 		t := float64(i) / ffps
 
 		start := time.Now()
-		out[i] = gifFrameEncode(Frame(t), Palette)
+		out[i] = Frame(t)
 		meas := time.Since(start)
 
 		ms := getMs(meas)
@@ -97,7 +97,7 @@ func printStats(s []float64) {
 	fmt.Printf("μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", avg, std, 3*std)
 }
 
-func gifFrameEncode(img image.Image, palette color.Palette) *image.Paletted {
+func gifEncodeFrame(img image.Image, palette color.Palette) *image.Paletted {
 	bnds := img.Bounds()
 	out := image.NewPaletted(bnds, palette)
 

@@ -6,7 +6,7 @@ import (
 
 var (
 	// https://colorhunt.co/palette/177866
-	Palette = color.Palette{
+	Palette1 = color.Palette{
 		color.RGBA{0x20, 0x40, 0x51, 0xff},
 		color.RGBA{0x3B, 0x69, 0x78, 0xff},
 		color.RGBA{0x84, 0xA9, 0xAC, 0xff},
