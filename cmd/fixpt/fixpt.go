@@ -8,6 +8,9 @@ import (
 	"image/gif"
 	"math"
 	"os"
+	"time"
+
+	"github.com/gonum/stat"
 )
 
 const (
@@ -55,13 +58,43 @@ func animate(count int, fps int) []*image.Paletted {
 		out  = make([]*image.Paletted, count)
 	)
 
+	times := make([]float64, count)
 	for i := 0; i < count; i++ {
 		t := float64(i) / ffps
-		fmt.Printf("%.3fs\n", t)
+
+		start := time.Now()
 		out[i] = gifFrameEncode(Frame(t), Palette)
+		meas := time.Since(start)
+
+		ms := getMs(meas)
+		times[i] = ms
+
+		fmt.Printf("seek: %.3fs, build time: %.3fms\n", t, ms)
 	}
 
+	printStats(times)
+
 	return out
+}
+
+func getMs(dur time.Duration) float64 {
+	return float64(dur.Nanoseconds()) * 1e-6
+}
+
+func getDelays(count, fps int) []int {
+	// delay is per frame, in 100ths of a second
+	delay := 100 / fps
+
+	out := make([]int, count)
+	for i := range out {
+		out[i] = delay
+	}
+	return out
+}
+
+func printStats(s []float64) {
+	avg, std := stat.MeanStdDev(s, nil)
+	fmt.Printf("μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", avg, std, 3*std)
 }
 
 func gifFrameEncode(img image.Image, palette color.Palette) *image.Paletted {
@@ -87,15 +120,4 @@ func gifOutputFile(filename string, jiffy *gif.GIF) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func getDelays(count, fps int) []int {
-	// delay is per frame, in 100ths of a second
-	delay := 100 / fps
-
-	out := make([]int, count)
-	for i := range out {
-		out[i] = delay
-	}
-	return out
 }
