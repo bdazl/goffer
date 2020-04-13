@@ -114,9 +114,9 @@ func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
 		v := n.P()
 		kit.Circle(gc, v.X, v.Y, csiz)
 		gc.FillStroke()
-
-		n.Step()
 	}
+
+	f.Graph.Step()
 
 	return gifEncodeFrame(img, palette)
 }

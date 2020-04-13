@@ -6,7 +6,6 @@ import (
 
 type Node interface {
 	P() r2.Vec
-	Step()
 }
 
 type Edge struct {
@@ -19,7 +18,6 @@ type FixNode struct {
 }
 
 func (n FixNode) P() r2.Vec { return n.Pos }
-func (n FixNode) Step()     {}
 
 type FluidNode struct {
 	Pos     r2.Vec
@@ -71,4 +69,15 @@ func (g *Graph) GetNodeEdges(n Node) []Edge {
 		}
 	}
 	return out
+}
+
+func (g *Graph) Step() {
+	for i, n := range g.Nodes {
+		switch v := n.(type) {
+		case *FluidNode:
+			v.Step()
+		}
+
+		g.Nodes[i] = n
+	}
 }
