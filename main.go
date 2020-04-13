@@ -36,7 +36,6 @@ func main() {
 	flag.Parse()
 
 	rand.Seed(19901231)
-
 	initGlobals()
 
 	imgs := animate(FrameCount, FPS)
@@ -57,7 +56,7 @@ func animate(count int, fps int) []*image.Paletted {
 
 	t0 := time.Now()
 	P.Init()
-	fmt.Printf("init time: %.3fms", getMs(time.Since(t0)))
+	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
 
 	t1 := time.Now()
 	times := make([]float64, count)
