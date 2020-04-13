@@ -15,21 +15,6 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-var (
-	Projects = map[string]Project{
-		"fulkonstett": &frameFulkonstOne{},
-		"fulkonsttvå": &frameFulkonstTwo{},
-	}
-
-	Pstr = "fulkonsttvå"
-	P    = Projects[Pstr]
-)
-
-type Project interface {
-	Init()
-	Frame(t float64) *image.Paletted
-}
-
 func main() {
 	flag.IntVar(&FPS, "fps", FPS, "frames per second")
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
