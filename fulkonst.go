@@ -2,11 +2,9 @@ package main
 
 import (
 	"image"
-	"image/color"
 	"math"
 	"math/rand"
 
-	"github.com/llgcode/draw2d/draw2dimg"
 	kit "github.com/llgcode/draw2d/draw2dkit"
 
 	"gonum.org/v1/gonum/spatial/r2"
@@ -22,7 +20,7 @@ func (f frameFulkonstOne) Frame(t float64) *image.Paletted {
 		cx, cy  = w / 2.0, h / 2.0
 	)
 
-	img, gc := fulkonstCommon(palette)
+	img, gc := drawCommon(palette)
 
 	rad := TwoPi * t / Total
 	amp := w / 2.0
@@ -101,7 +99,7 @@ func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
 		palette = Palette1
 	)
 
-	img, gc := fulkonstCommon(palette)
+	img, gc := drawCommon(palette)
 
 	for _, e := range f.Graph.Edges {
 		a := e.A.P()
@@ -128,17 +126,4 @@ func randPt(cx, cy, w, h float64) r2.Vec {
 		X: rand.Float64()*w + cx/2.0,
 		Y: rand.Float64()*h + cy/2.0,
 	}
-}
-
-func fulkonstCommon(palette color.Palette) (*image.RGBA, *draw2dimg.GraphicContext) {
-	bounds := image.Rect(0, 0, Width, Height)
-	img := image.NewRGBA(bounds)
-	gc := draw2dimg.NewGraphicContext(img)
-
-	// Set some properties
-	gc.SetFillColor(palette[1])
-	gc.SetStrokeColor(palette[2])
-	gc.SetLineWidth(2)
-
-	return img, gc
 }
