@@ -47,7 +47,7 @@ type frameFulkonstTwo struct {
 func (f *frameFulkonstTwo) Init() {
 	const (
 		subCount = 3
-		dist     = 40.0
+		dist     = 52.0
 		hdist    = dist / 2.0
 	)
 
@@ -65,7 +65,7 @@ func (f *frameFulkonstTwo) Init() {
 			newNode := &FluidNode{
 				// random direction
 				Pos: jexpV(rand.Float64(), dist, prevP.X, prevP.Y),
-				Vel: jexpV(rand.Float64(), 1.0, 0.0, 0.0),
+				Vel: jexpV(rand.Float64(), 2.0, 0.0, 0.0),
 				StepFun: func(fn *FluidNode) {
 					// TODO
 					edges := f.Graph.GetNodeEdges(fn)
