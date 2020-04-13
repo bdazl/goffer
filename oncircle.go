@@ -113,7 +113,7 @@ type OnCircle0 struct {
 
 func (o *OnCircle0) Init() {
 	const (
-		circs = 2
+		circs = 3
 		r0    = 70.0
 		distB = 20.0
 		pts   = 13
@@ -141,9 +141,10 @@ func (o *OnCircle0) Init() {
 
 func (o *OnCircle0) Frame(t float64) *image.Paletted {
 	const (
-		amp   = 0.1
+		amp   = 0.09
 		sigma = 2.0
 		is    = 0.33
+		isv   = 0.1
 	)
 	var (
 		palette = Palette1
@@ -154,7 +155,7 @@ func (o *OnCircle0) Frame(t float64) *image.Paletted {
 
 	for i, c := range o.Circs {
 		fi := float64(i)
-		fis := fi * is * TwoPi // :)
+		fis := fi * is // :)
 		c.Apply(func(n *CNode, f float64) {
 
 			// make the wavelet repeat saw: [0, 1] -> [-1, 1] (repeating)
