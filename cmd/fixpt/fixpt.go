@@ -11,6 +11,7 @@ import (
 	"path"
 	"time"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/stat"
 )
 
@@ -54,7 +55,11 @@ func animate(count int, fps int) []*image.Paletted {
 		out  = make([]*image.Paletted, count)
 	)
 
+	t0 := time.Now()
 	P.Init()
+	fmt.Printf("init time: %.3fms", getMs(time.Since(t0)))
+
+	t1 := time.Now()
 	times := make([]float64, count)
 	for i := 0; i < count; i++ {
 		t := float64(i) / ffps
@@ -69,6 +74,7 @@ func animate(count int, fps int) []*image.Paletted {
 		fmt.Printf("seek: %.3fs, build time: %.3fms\n", t, ms)
 	}
 
+	fmt.Printf("total build time: %.3fms\n", getMs(time.Since(t1)))
 	printStats(times)
 
 	return out
@@ -90,8 +96,9 @@ func getDelays(count, fps int) []int {
 }
 
 func printStats(s []float64) {
+	sum := floats.Sum(s)
 	avg, std := stat.MeanStdDev(s, nil)
-	fmt.Printf("μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", avg, std, 3*std)
+	fmt.Printf("sum: %.3f, μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", sum, avg, std, 3*std)
 }
 
 func gifEncodeFrame(img image.Image, palette color.Palette) *image.Paletted {
