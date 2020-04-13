@@ -24,22 +24,6 @@ var (
 	P    = Projects[Pstr]
 )
 
-var (
-	FPS        = 30
-	FrameCount = FPS * 4
-	Width      = 512
-	Height     = 512
-)
-
-// calculated
-var (
-	Total = 5.
-	W     = 512.0
-	H     = 512.0
-	CX    = 512 / 2.0
-	CY    = 512 / 2.0
-)
-
 type Project interface {
 	Init()
 	Frame(t float64) *image.Paletted
@@ -52,9 +36,7 @@ func main() {
 
 	rand.Seed(19901231)
 
-	Total = float64(FrameCount) / float64(FPS)
-	W, H = float64(Width), float64(Height)
-	CX, CY = W/2.0, H/2.0
+	initGlobals()
 
 	imgs := animate(FrameCount, FPS)
 
