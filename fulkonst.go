@@ -7,6 +7,8 @@ import (
 
 	kit "github.com/llgcode/draw2d/draw2dkit"
 
+	"gonum.org/v1/gonum/graph"
+	"gonum.org/v1/gonum/graph/simple"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
@@ -39,7 +41,9 @@ func (f frameFulkonstOne) Frame(t float64) *image.Paletted {
 }
 
 type frameFulkonstTwo struct {
-	Graph
+	Graph *simple.DirectedGraph
+	Roots []*FixNode
+	Edges map[int64]*WeightEdge
 }
 
 func (f *frameFulkonstTwo) Init() {
@@ -49,44 +53,46 @@ func (f *frameFulkonstTwo) Init() {
 		hdist    = dist / 2.0
 	)
 
-	f.Graph.Nodes = []Node{
-		&FixNode{Pos: r2.Vec{X: CX + hdist, Y: CY + hdist}},
-		&FixNode{Pos: r2.Vec{X: CX - hdist, Y: CY + hdist}},
-		&FixNode{Pos: r2.Vec{X: CX - hdist, Y: CY - hdist}},
-		&FixNode{Pos: r2.Vec{X: CX + hdist, Y: CY - hdist}},
+	f.Graph = simple.NewDirectedGraph()
+	f.Edges = make(map[int64]*WeightEdge)
+
+	f.Roots = []*FixNode{
+		NewFixNode(r2.Vec{X: CX + hdist, Y: CY + hdist}),
+		NewFixNode(r2.Vec{X: CX - hdist, Y: CY + hdist}),
+		NewFixNode(r2.Vec{X: CX - hdist, Y: CY - hdist}),
+		NewFixNode(r2.Vec{X: CX + hdist, Y: CY - hdist}),
+	}
+
+	for _, r := range f.Roots {
+		f.Graph.AddNode(r)
 	}
 
 	for r := 0; r < 4; r++ {
-		prevI := r
-		prevP := f.Graph.Nodes[r].P()
+		var prev graph.Node = f.Roots[r]
 		for i := 0; i < subCount; i++ {
-			newNode := &FluidNode{
-				// random direction
-				Pos: jexpV(rand.Float64(), dist, prevP.X, prevP.Y),
-				Vel: jexpV(rand.Float64(), 2.0, 0.0, 0.0),
-				StepFun: func(fn *FluidNode) {
-					// TODO
-					edges := f.Graph.GetNodeEdges(fn)
-					var me Edge
-					for _, e := range edges {
-						if e.A != fn {
-							me = e
-							break
-						}
-					}
+			prevP := prev.(Positioner).Pos()
+			newNode := NewFluidNode(jexpV(rand.Float64(), dist, prevP.X, prevP.Y),
+				jexpV(rand.Float64(), 2.0, 0.0, 0.0), // vel
+				func(t float64, fn *FluidNode) {
+					var parent Positioner
 
-					fn.Pos = fn.Pos.Add(fn.Vel)
-					parentP := me.A.P()
+					e := f.Edges[fn.ID()]
+					parent = e.From().(Positioner)
+					parentP := parent.Pos()
+
+					newPos := fn.Base.P.Add(fn.V)
 
 					// normalize lenght
-					fn.Pos = parentP.Add(normalize(fn.Pos.Sub(parentP)).Scale(me.L))
+					fn.Base.P = parentP.Add(normalize(newPos.Sub(parentP)).Scale(e.L))
 				},
-			}
-			ni := f.Graph.AddNode(newNode)
-			f.Graph.AddEdge(prevI, ni, length(prevP, newNode.Pos))
+			)
+			f.Graph.AddNode(newNode)
 
-			prevI = ni
-			prevP = newNode.Pos
+			e := NewWeightEdge(prev, newNode, length(prevP, newNode.Pos()))
+			f.Graph.SetEdge(e)
+			f.Edges[newNode.ID()] = e
+
+			prev = newNode
 		}
 	}
 }
@@ -101,22 +107,29 @@ func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
 
 	img, gc := drawCommon(palette)
 
-	for _, e := range f.Graph.Edges {
-		a := e.A.P()
-		b := e.B.P()
+	eiter := f.Graph.Edges()
+	for eiter.Next() {
+		e := eiter.Edge()
+		a := e.From().(Positioner).Pos()
+		b := e.To().(Positioner).Pos()
 
 		gc.MoveTo(a.X, a.Y)
 		gc.LineTo(b.X, b.Y)
 		gc.Stroke()
 	}
 
-	for _, n := range f.Graph.Nodes {
-		v := n.P()
+	niter := f.Graph.Nodes()
+	for niter.Next() {
+		n := niter.Node()
+		v := n.(Positioner).Pos()
+
 		kit.Circle(gc, v.X, v.Y, csiz)
 		gc.FillStroke()
-	}
 
-	f.Graph.Step()
+		if u, ok := n.(Updater); ok {
+			u.Update(t)
+		}
+	}
 
 	return gifEncodeFrame(img, palette)
 }

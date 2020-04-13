@@ -1,83 +1,99 @@
 package main
 
 import (
+	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/spatial/r2"
+	"sync/atomic"
 )
 
-type Node interface {
-	P() r2.Vec
+var (
+	nextNodeID int64 = 0
+)
+
+type Positioner interface {
+	Pos() r2.Vec
 }
 
-type Edge struct {
-	A, B Node
-	L    float64
+type Velocitor interface {
+	Vel() r2.Vec
+}
+
+type Updater interface {
+	Update(float64)
+}
+
+type WeightEdge struct {
+	*Edge
+	L float64
+}
+
+func NewWeightEdge(f, t graph.Node, l float64) *WeightEdge {
+	return &WeightEdge{
+		Edge: NewEdge(f, t),
+		L:    l,
+	}
 }
 
 type FixNode struct {
-	Pos r2.Vec
+	Base *Node
+	P    r2.Vec
 }
 
-func (n FixNode) P() r2.Vec { return n.Pos }
+func (n FixNode) Pos() r2.Vec { return n.P }
+func (n FixNode) ID() int64   { return n.Base.ID() }
+
+func NewFixNode(pos r2.Vec) *FixNode {
+	return &FixNode{
+		Base: NewNode(),
+		P:    pos,
+	}
+}
 
 type FluidNode struct {
-	Pos     r2.Vec
-	Vel     r2.Vec
-	StepFun func(*FluidNode)
+	Base    *FixNode
+	V       r2.Vec
+	StepFun func(float64, *FluidNode)
 }
 
-func (n *FluidNode) P() r2.Vec { return n.Pos }
-func (n *FluidNode) V() r2.Vec { return n.Vel }
-func (n *FluidNode) Step()     { n.StepFun(n) }
+func (f *FluidNode) Pos() r2.Vec      { return f.Base.P }
+func (f *FluidNode) Vel() r2.Vec      { return f.V }
+func (f *FluidNode) ID() int64        { return f.Base.ID() }
+func (f *FluidNode) Update(t float64) { f.StepFun(t, f) }
 
-type Graph struct {
-	Nodes []Node
-	Edges []Edge
+func NewFluidNode(pos, vel r2.Vec, step func(float64, *FluidNode)) *FluidNode {
+	return &FluidNode{
+		Base:    NewFixNode(pos),
+		V:       vel,
+		StepFun: step,
+	}
 }
 
-func (g *Graph) AddNode(n Node) int {
-	g.Nodes = append(g.Nodes, n)
-	return len(g.Nodes) - 1
+type Edge struct {
+	F, T graph.Node
 }
 
-func (g *Graph) AddEdge(u, v int, l float64) {
-	if u < 0 || u >= len(g.Nodes) {
-		panic("bad u")
-	}
-	if v < 0 || v >= len(g.Nodes) {
-		panic("bad v")
-	}
+func (e *Edge) From() graph.Node         { return e.F }
+func (e *Edge) To() graph.Node           { return e.T }
+func (e *Edge) ReversedEdge() graph.Edge { return &Edge{F: e.T, T: e.F} }
 
-	nu, nv := g.Nodes[u], g.Nodes[v]
-
-	// if it already exists, update weight
-	for i, e := range g.Edges {
-		if (e.A == nu && e.B == nv) ||
-			(e.B == nu && e.A == nv) {
-			g.Edges[i].L = l
-			return
-		}
-	}
-
-	g.Edges = append(g.Edges, Edge{A: nu, B: nv, L: l})
+func NewEdge(f, t graph.Node) *Edge {
+	return &Edge{F: f, T: t}
 }
 
-func (g *Graph) GetNodeEdges(n Node) []Edge {
-	out := make([]Edge, 0, len(g.Nodes))
-	for _, e := range g.Edges {
-		if e.A == n || e.B == n {
-			out = append(out, e)
-		}
-	}
-	return out
+type Node struct {
+	id int64
 }
 
-func (g *Graph) Step() {
-	for i, n := range g.Nodes {
-		switch v := n.(type) {
-		case *FluidNode:
-			v.Step()
-		}
+func (n Node) ID() int64 {
+	return n.id
+}
 
-		g.Nodes[i] = n
+func NewNode() *Node {
+	return &Node{
+		id: NewNodeID(),
 	}
+}
+
+func NewNodeID() int64 {
+	return atomic.AddInt64(&nextNodeID, 1)
 }
