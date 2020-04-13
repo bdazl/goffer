@@ -143,23 +143,26 @@ func (o *OnCircle0) Frame(t float64) *image.Paletted {
 	const (
 		amp   = 0.1
 		sigma = 2.0
-		is    = 10.0
-		fs    = 8.0
+		is    = 0.33
 	)
 	var (
 		palette = Palette1
+		tzo     = t / (Total - DT)
 	)
 
 	img, gc := drawCommon(palette)
 
-	for _, c := range o.Circs {
-		//fi := float64(i)
-		//fis := fi * is // :)
+	for i, c := range o.Circs {
+		fi := float64(i)
+		fis := fi * is * TwoPi // :)
 		c.Apply(func(n *CNode, f float64) {
-			//f = f + 0.1*math.Sin(TwoPi*t*0.1)
-			tzo := t / (Total - DT)
+
+			// make the wavelet repeat saw: [0, 1] -> [-1, 1] (repeating)
 			saw := 2.0*math.Mod((f+tzo)*2, 2.0) - 1.0
 			r := c.r + amp*c.r*MorletBnd(sigma, saw)
+
+			f = f + fis
+
 			n.P = jexpV(f, r, CX, CY)
 		})
 		c.Render(gc, palette)
