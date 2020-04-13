@@ -96,7 +96,7 @@ func (c OCirc) Len() int {
 
 func (c *OCirc) Apply(fun func(n *CNode, f float64)) {
 	i := 0.0
-	l := float64(c.Len())
+	l := float64(c.Len() - 1)
 	next := c.Root
 	for next != nil {
 		f := i / l
