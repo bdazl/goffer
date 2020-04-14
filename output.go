@@ -12,12 +12,12 @@ import (
 type FileType string
 
 const (
-	GIF FileType = ".gif"
-	MP4 FileType = ".mp4"
+	GIF FileType = "gif"
+	MP4 FileType = "mp4"
 )
 
 func OutputFile(imgs []image.Image) {
-	filename := path.Join("out", ActiveProject, string(OutputFileType))
+	filename := path.Join("out", ActiveProject+"."+string(OutputFileType))
 
 	switch OutputFileType {
 	case MP4:
