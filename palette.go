@@ -5,6 +5,8 @@ import (
 )
 
 var (
+	Palette = Palette1
+
 	// https://colorhunt.co/palette/177866
 	Palette1 = color.Palette{
 		color.RGBA{0x20, 0x40, 0x51, 0xff},

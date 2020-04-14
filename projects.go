@@ -17,5 +17,5 @@ var (
 
 type Project interface {
 	Init()
-	Frame(t float64) *image.Paletted
+	Frame(t float64) image.Image
 }

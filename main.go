@@ -4,10 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"image/color"
-	"image/gif"
 	"math/rand"
-	"os"
 	"path"
 	"time"
 
@@ -20,31 +17,26 @@ func main() {
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
 	flag.Parse()
 
+	filename := path.Join("out", fmt.Sprintf("%v.gif", Pstr))
+
 	rand.Seed(19901231)
 	initGlobals()
 
 	imgs := animate(FrameCount, FPS)
 
-	jiffy := &gif.GIF{
-		Image: imgs,
-		Delay: getDelays(len(imgs), FPS),
-	}
-
-	gifOutputFile(path.Join("out", fmt.Sprintf("%v.gif", Pstr)), jiffy)
+	OutputFile(filename, imgs, GIF)
 }
 
-func animate(count int, fps int) []*image.Paletted {
-	var (
-		ffps = float64(fps)
-		out  = make([]*image.Paletted, count)
-	)
-
+func animate(count int, fps int) []image.Image {
 	t0 := time.Now()
+	out := make([]image.Image, count)
 	P.Init()
 	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
 
 	t1 := time.Now()
 	times := make([]float64, count)
+
+	ffps := float64(fps)
 	for i := 0; i < count; i++ {
 		t := float64(i) / ffps
 
@@ -58,7 +50,7 @@ func animate(count int, fps int) []*image.Paletted {
 		fmt.Printf("seek: %.3fs, build time: %.3fms\n", t, ms)
 	}
 
-	fmt.Printf("total build time: %.3fms\n", getMs(time.Since(t1)))
+	fmt.Printf("total build time: %v\n", time.Since(t1))
 	printStats(times)
 
 	return out
@@ -68,45 +60,8 @@ func getMs(dur time.Duration) float64 {
 	return float64(dur.Nanoseconds()) * 1e-6
 }
 
-func getDelays(count, fps int) []int {
-	// delay is per frame, in 100ths of a second
-	delay := 100 / fps
-
-	out := make([]int, count)
-	for i := range out {
-		out[i] = delay
-	}
-	return out
-}
-
 func printStats(s []float64) {
 	sum := floats.Sum(s)
 	avg, std := stat.MeanStdDev(s, nil)
 	fmt.Printf("sum: %.3f, μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", sum, avg, std, 3*std)
-}
-
-func gifEncodeFrame(img image.Image, palette color.Palette) *image.Paletted {
-	bnds := img.Bounds()
-	out := image.NewPaletted(bnds, palette)
-
-	for y := bnds.Min.Y; y < bnds.Max.Y; y++ {
-		for x := bnds.Min.X; x < bnds.Max.X; x++ {
-			idx := palette.Index(img.At(x, y))
-			out.SetColorIndex(x, y, uint8(idx))
-		}
-	}
-	return out
-}
-
-func gifOutputFile(filename string, jiffy *gif.GIF) {
-	ofile, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Writing to file:", filename)
-	err = gif.EncodeAll(ofile, jiffy)
-	if err != nil {
-		panic(err)
-	}
 }

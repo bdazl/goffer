@@ -15,14 +15,13 @@ import (
 type frameFulkonstOne struct{}
 
 func (f frameFulkonstOne) Init() {}
-func (f frameFulkonstOne) Frame(t float64) *image.Paletted {
+func (f frameFulkonstOne) Frame(t float64) image.Image {
 	var (
-		palette = Palette1
-		w, h    = float64(Width), float64(Height)
-		cx, cy  = w / 2.0, h / 2.0
+		w, h   = float64(Width), float64(Height)
+		cx, cy = w / 2.0, h / 2.0
 	)
 
-	img, gc := drawCommon(palette)
+	img, gc := drawCommon(Palette)
 
 	rad := TwoPi * t / Total
 	amp := w / 2.0
@@ -37,7 +36,7 @@ func (f frameFulkonstOne) Frame(t float64) *image.Paletted {
 	gc.Close()
 	gc.FillStroke()
 
-	return gifEncodeFrame(img, palette)
+	return img
 }
 
 type frameFulkonstTwo struct {
@@ -97,15 +96,12 @@ func (f *frameFulkonstTwo) Init() {
 	}
 }
 
-func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
+func (f *frameFulkonstTwo) Frame(t float64) image.Image {
 	const (
 		csiz = 5.0
 	)
-	var (
-		palette = Palette1
-	)
 
-	img, gc := drawCommon(palette)
+	img, gc := drawCommon(Palette)
 
 	eiter := f.Graph.Edges()
 	for eiter.Next() {
@@ -131,7 +127,7 @@ func (f *frameFulkonstTwo) Frame(t float64) *image.Paletted {
 		}
 	}
 
-	return gifEncodeFrame(img, palette)
+	return img
 }
 
 func randPt(cx, cy, w, h float64) r2.Vec {

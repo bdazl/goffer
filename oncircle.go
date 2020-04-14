@@ -139,7 +139,7 @@ func (o *OnCircle0) Init() {
 	}
 }
 
-func (o *OnCircle0) Frame(t float64) *image.Paletted {
+func (o *OnCircle0) Frame(t float64) image.Image {
 	const (
 		amp   = 0.09
 		sigma = 2.0
@@ -147,11 +147,10 @@ func (o *OnCircle0) Frame(t float64) *image.Paletted {
 		isv   = 0.1
 	)
 	var (
-		palette = Palette1
-		tzo     = t / (Total - DT)
+		tzo = t / (Total - DT)
 	)
 
-	img, gc := drawCommon(palette)
+	img, gc := drawCommon(Palette)
 
 	for i, c := range o.Circs {
 		fi := float64(i)
@@ -166,8 +165,8 @@ func (o *OnCircle0) Frame(t float64) *image.Paletted {
 
 			n.P = jexpV(f, r, CX, CY)
 		})
-		c.Render(gc, palette)
+		c.Render(gc, Palette)
 	}
 
-	return gifEncodeFrame(img, palette)
+	return img
 }
