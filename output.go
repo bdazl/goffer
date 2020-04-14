@@ -5,17 +5,23 @@ import (
 	"image"
 	"image/gif"
 	"os"
+	"path"
 	"time"
 )
 
-type FileType int
+type FileType string
 
 const (
-	GIF = iota + 1
+	GIF FileType = ".gif"
+	MP4 FileType = ".mp4"
 )
 
-func OutputFile(filename string, imgs []image.Image, ft FileType) {
-	switch ft {
+func OutputFile(imgs []image.Image) {
+	filename := path.Join("out", ActiveProject, string(OutputFileType))
+
+	switch OutputFileType {
+	//case MP4:
+	//mp4OutputFile(filename, imgs)
 	case GIF:
 		gifOutputFile(filename, imgs)
 	default:
@@ -23,6 +29,9 @@ func OutputFile(filename string, imgs []image.Image, ft FileType) {
 		os.Exit(1)
 	}
 }
+
+//func mp4OutputFile(filename string, imgs []image.Image) {
+//}
 
 func gifOutputFile(filename string, imgs []image.Image) {
 	fmt.Println("encoding images with gif palette...")

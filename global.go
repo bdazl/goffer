@@ -8,6 +8,10 @@ var (
 	Height     = 512
 )
 
+var (
+	OutputFileType = MP4
+)
+
 // calculated
 var (
 	Total = 5.

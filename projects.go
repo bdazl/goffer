@@ -11,8 +11,8 @@ var (
 		"circ0":       &OnCircle0{},
 	}
 
-	Pstr = "circ0"
-	P    = Projects[Pstr]
+	ActiveProject = "circ0"
+	P             = Projects[ActiveProject]
 )
 
 type Project interface {

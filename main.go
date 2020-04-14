@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"math/rand"
-	"path"
 	"time"
 
 	"gonum.org/v1/gonum/floats"
@@ -17,14 +16,12 @@ func main() {
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
 	flag.Parse()
 
-	filename := path.Join("out", fmt.Sprintf("%v.gif", Pstr))
-
 	rand.Seed(19901231)
 	initGlobals()
 
 	imgs := animate(FrameCount, FPS)
 
-	OutputFile(filename, imgs, GIF)
+	OutputFile(imgs)
 }
 
 func animate(count int, fps int) []image.Image {
