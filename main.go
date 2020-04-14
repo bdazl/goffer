@@ -62,3 +62,9 @@ func printStats(s []float64) {
 	avg, std := stat.MeanStdDev(s, nil)
 	fmt.Printf("sum: %.3f, μ: %.3f, σ: %.3f (95%% aka ±2σ = ±%.3f)\n", sum, avg, std, 3*std)
 }
+
+func panicOn(err error) {
+	if err != nil {
+		panic(err)
+	}
+}

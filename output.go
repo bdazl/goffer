@@ -20,8 +20,8 @@ func OutputFile(imgs []image.Image) {
 	filename := path.Join("out", ActiveProject, string(OutputFileType))
 
 	switch OutputFileType {
-	//case MP4:
-	//mp4OutputFile(filename, imgs)
+	case MP4:
+		mp4OutputFile(filename, imgs)
 	case GIF:
 		gifOutputFile(filename, imgs)
 	default:
@@ -29,9 +29,6 @@ func OutputFile(imgs []image.Image) {
 		os.Exit(1)
 	}
 }
-
-//func mp4OutputFile(filename string, imgs []image.Image) {
-//}
 
 func gifOutputFile(filename string, imgs []image.Image) {
 	fmt.Println("encoding images with gif palette...")
@@ -44,23 +41,17 @@ func gifOutputFile(filename string, imgs []image.Image) {
 
 	jiffy := &gif.GIF{
 		Image: encoded,
-		Delay: getDelays(len(imgs), FPS),
+		Delay: gifGetDelays(len(imgs), FPS),
 	}
 
 	ofile, err := os.Create(filename)
-	if err != nil {
-		panic(err)
-	}
+	panicOn(err)
 
-	t1 := time.Now()
-	defer fmt.Println("write time:", time.Since(t1))
 	defer ofile.Close()
 
 	fmt.Println("writing to file:", filename)
 	err = gif.EncodeAll(ofile, jiffy)
-	if err != nil {
-		panic(err)
-	}
+	panicOn(err)
 }
 
 func gifEncodeFrame(img image.Image) *image.Paletted {
@@ -76,7 +67,7 @@ func gifEncodeFrame(img image.Image) *image.Paletted {
 	return out
 }
 
-func getDelays(count, fps int) []int {
+func gifGetDelays(count, fps int) []int {
 	// delay is per frame, in 100ths of a second
 	delay := 100 / fps
 

@@ -9,7 +9,7 @@ var (
 )
 
 var (
-	OutputFileType = MP4
+	OutputFileType = GIF
 )
 
 // calculated
