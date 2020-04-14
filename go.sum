@@ -10,6 +10,8 @@ github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc h1:v8qNcPPBCFppcuCW
 github.com/llgcode/draw2d v0.0.0-20200110163050-b96d8208fcfc/go.mod h1:mVa0dA29Db2S4LVqDYLlsePDzRJLDfdhVZiI15uY0FA=
 github.com/llgcode/ps v0.0.0-20150911083025-f1443b32eedb h1:61ndUreYSlWFeCY44JxDDkngVoI7/1MVhEl98Nm0KOk=
 github.com/llgcode/ps v0.0.0-20150911083025-f1443b32eedb/go.mod h1:1l8ky+Ew27CMX29uG+a2hNOKpeNYEQjjtiALiBlFQbY=
+github.com/mshafiee/mp4 v0.0.0-20180318080707-0ad720116a9c h1:VOpGe9kDjJFKLThtXspb/q8PkeMrK/wOutC1r5HYnjE=
+github.com/mshafiee/mp4 v0.0.0-20180318080707-0ad720116a9c/go.mod h1:zZE1oYfnqlhcW8vOASrDRDLbevDI+T2o/dM8BDCAOjA=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2 h1:y102fOLFqhV41b+4GPiJoa0k/x+pJcEi2/HB1Y5T6fU=
