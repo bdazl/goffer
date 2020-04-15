@@ -58,6 +58,23 @@ func exp(x float64) float64 {
 	return math.Exp(x)
 }
 
+func smoothstep(edge0, edge1, x float64) float64 {
+	// Scale, and clamp x to 0..1 range
+	x = clamp((x-edge0)/(edge1-edge0), 0.0, 1.0)
+	// Evaluate polynomial
+	return x * x * x * (x*(x*6-15) + 10)
+}
+
+func clamp(x, low, hi float64) float64 {
+	if x < low {
+		return low
+	}
+	if x > hi {
+		return hi
+	}
+	return x
+}
+
 // VECTORS
 
 func norm(v r2.Vec) float64 {

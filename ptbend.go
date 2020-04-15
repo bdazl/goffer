@@ -163,7 +163,7 @@ func (p *PtBend0) Render(gc *draw2dimg.GraphicContext) {
 		next := p.Next[i]
 
 		// TODO: not linearly interpolate?
-		lerp := now + complex(p.Zo, 0.0)*(next-now)
+		lerp := now + complex(smoothstep(0.0, 1.0, p.Zo), 0.0)*(next-now)
 
 		siz := sBase / (p.Doubles * 2.0)
 		if p.NextT == Duplicate {
@@ -172,7 +172,7 @@ func (p *PtBend0) Render(gc *draw2dimg.GraphicContext) {
 				zo = 1.0
 			}
 
-			siz = sBase / (2 * (p.Doubles + zo))
+			siz = sBase / (2 * (p.Doubles + smoothstep(0.0, 1.0, zo)))
 		}
 
 		scr := ComplexToScreen(lerp, siz)
