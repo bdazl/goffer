@@ -43,12 +43,14 @@ func backupOld(filename string) {
 
 	i := 0
 	dir := path.Dir(filename)
-	for fileExists(filename) {
-		fil := path.Base(filename)
-		filext := strings.Split(fil, ".")
+	fil := path.Base(filename)
+	filext := strings.Split(fil, ".")
 
+	for fileExists(filename) {
 		id := strconv.Itoa(i)
 		filename = path.Join(dir, filext[0]+"_"+id+"."+filext[1])
+
+		i++
 	}
 
 	fmt.Printf("backing up file: %v -> %v\n", old, filename)
