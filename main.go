@@ -11,9 +11,18 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
+// cmd line arguments
+var (
+	FPS        = 30
+	FrameCount = FPS * 4
+	Width      = 512
+	Height     = 512
+)
+
 func main() {
 	flag.IntVar(&FPS, "fps", FPS, "frames per second")
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
+	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
 	flag.Parse()
 
 	rand.Seed(19901231)
