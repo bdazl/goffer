@@ -21,7 +21,10 @@ const (
 
 func OutputFile(imgs []image.Image) {
 	filename := path.Join("out", ActiveProject+"."+string(OutputFileType))
-	backupOld(filename)
+
+	if Backup {
+		backupOld(filename)
+	}
 
 	switch OutputFileType {
 	case MP4:

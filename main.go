@@ -17,11 +17,13 @@ var (
 	FrameCount = FPS * 4
 	Width      = 512
 	Height     = 512
+	Backup     = false
 )
 
 func main() {
 	flag.IntVar(&FPS, "fps", FPS, "frames per second")
 	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
+	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
 	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
 	flag.Parse()
 
