@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/gif"
+	"io"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -18,6 +21,7 @@ const (
 
 func OutputFile(imgs []image.Image) {
 	filename := path.Join("out", ActiveProject+"."+string(OutputFileType))
+	backupOld(filename)
 
 	switch OutputFileType {
 	case MP4:
@@ -28,6 +32,45 @@ func OutputFile(imgs []image.Image) {
 		fmt.Printf("bad output file type")
 		os.Exit(1)
 	}
+}
+
+func backupOld(filename string) {
+	if !fileExists(filename) {
+		return
+	}
+
+	old := filename
+
+	i := 0
+	dir := path.Dir(filename)
+	for fileExists(filename) {
+		fil := path.Base(filename)
+		filext := strings.Split(fil, ".")
+
+		id := strconv.Itoa(i)
+		filename = path.Join(dir, filext[0]+"_"+id+"."+filext[1])
+	}
+
+	fmt.Printf("backing up file: %v -> %v\n", old, filename)
+
+	src, err := os.Open(old)
+	panicOn(err)
+	defer src.Close()
+
+	dst, err := os.Create(filename)
+	panicOn(err)
+	defer dst.Close()
+
+	_, err = io.Copy(dst, src)
+	panicOn(err)
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
 
 func gifOutputFile(filename string, imgs []image.Image) {
