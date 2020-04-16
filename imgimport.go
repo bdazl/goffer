@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/jpeg"
 	"math"
+	"math/cmplx"
 	"os"
 )
 
@@ -33,12 +34,21 @@ func (i *ImgImport) getColor(x, y int, t float64) color.Color {
 	// [W,H] -> [1, -1]
 	z := complex(float64(2*x)/W-1, -float64(2*y)/H+1)
 
+	//ctt := complex(0, t)
 	// make some transformation
 	//w := (z + 2) * (z + 2) * (z - 1 - 2i) * (z + 1i)
-	w := 2.0 * z * z * z
+	//w := (z - 1) / (z + 1) // möbius transformation
+	//w := 4 * (z + 1/z)
+	//w := cmplx.Log(z)
+	//w := cmplx.Sin(1 / z) // cool!
+	g0 := gaussian(t, 4.0, Total/2.0, 1.0)
+	ct := complex(g0, 0)
+	w := ct * cmplx.Sin(z)
 
 	// interpolate between identity and transformation
-	o := z + complex(smoothstep(0.0, 1.0, t), 0.0)*(z-w)
+	//g1 := smoothstep(0.0, 1.0, t)
+	g1 := gaussian(t, 1.0, Total/2.0, 1.0)
+	o := z + complex(g1, 0.0)*(z-w)
 
 	// transform back into image coordinates
 	xx, yy := complexToImage(o, W, H, 1.0, 1.0)

@@ -75,6 +75,12 @@ func clamp(x, low, hi float64) float64 {
 	return x
 }
 
+// The parameter a is the height of the curve's peak, b is the position of the center of the peak and c (the standard deviation, sometimes called the Gaussian RMS width)
+func gaussian(x, a, b, c float64) float64 {
+	q := x - b
+	return a * exp(-q*q/2*c*c)
+}
+
 // VECTORS
 
 func norm(v r2.Vec) float64 {
