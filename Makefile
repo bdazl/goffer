@@ -1,11 +1,13 @@
+.PHONY: rsync _ptbend ptbend imgimport
 
-.PHONY: rsync
 rsync:
 	rsync -av out/ ~/Dropbox/genart/goffer
 
-.PHONY: ptbend
 _ptbend:
 	go run . -backup -proj ptbend0 -fcount 990
 
-.PHONY: ptbend
+_imgimport:
+	go run . -backup -proj imgimport -fcount 160
+
 ptbend: _ptbend rsync
+imgimport: _imgimport rsync
