@@ -88,3 +88,12 @@ func length(a, b r2.Vec) float64 {
 func normalize(a r2.Vec) r2.Vec {
 	return a.Scale(1.0 / norm(a))
 }
+
+// Complex functions
+// w: width of image
+// h: height of image
+// zw: width of complex region to stretch
+// zh: height of complex region to stretch
+func complexToImage(c complex128, w, h, zw, zh float64) (float64, float64) {
+	return (real(c) + zw) * w / (2.0 * zw), (-imag(c) + zh) * h / (2.0 * zh)
+}
