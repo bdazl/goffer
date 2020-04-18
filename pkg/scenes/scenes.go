@@ -5,20 +5,21 @@ import (
 )
 
 var (
-	Scenes = map[string]Project{
+	Scenes = map[string]Scene{
 		"fulkonstett": &frameFulkonstOne{},
 		"fulkonsttvå": &frameFulkonstTwo{},
 		"circ0":       &OnCircle0{},
 		"ptbend0":     &PtBend0{},
 		"imgimport":   &ImgImport{},
+		"lines":       &Lines{},
 	}
 )
 
 func LastScene() string {
-	return "imgimport"
+	return "lines"
 }
 
-type Project interface {
+type Scene interface {
 	Init()
 	Frame(t float64) image.Image
 }
