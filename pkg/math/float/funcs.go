@@ -13,9 +13,9 @@ func main() {
 // Sigma is nice
 func Morlet(sigma, t float64) float64 {
 	const (
-		m12 = -1 / 2
-		m14 = -1 / 4
-		m34 = -3 / 4
+		m12 = -1.0 / 2.0
+		m14 = -1.0 / 4.0
+		m34 = -3.0 / 4.0
 	)
 	var (
 		s     = sigma
