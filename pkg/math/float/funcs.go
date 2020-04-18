@@ -46,6 +46,17 @@ func Smoothstep(edge0, edge1, x float64) float64 {
 	return x * x * x * (x*(x*6-15) + 10)
 }
 
+func Step(edge, x float64) float64 {
+	if x > edge {
+		return 1.0
+	}
+	return 0.0
+}
+
+func Box(edge0, edge1, x float64) float64 {
+	return Step(edge0, x) * Step(edge1, -x)
+}
+
 func Clamp(x, low, hi float64) float64 {
 	if x < low {
 		return low
