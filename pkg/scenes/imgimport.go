@@ -60,8 +60,8 @@ func (i *ImgImport) getColor(x, y int, t float64) color.Color {
 
 	// modulate to make sure we're always inside image
 	iw, ih := float64(bnds.Max.X), float64(bnds.Max.Y)
-	x = int(math.Mod(xx, iw))
-	y = int(math.Mod(yy, ih))
+	x = int(math.Abs(math.Mod(xx, iw)))
+	y = int(math.Abs(math.Mod(yy, ih)))
 
 	//fmt.Printf("x: %v, y: %v, z: %v, o: %v, xx: %v, yy: %v\n", x, y, z, o, xx, yy)
 
