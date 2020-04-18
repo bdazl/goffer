@@ -18,8 +18,13 @@ var (
 
 func expandPalette(p color.Palette, cnt int) color.Palette {
 	np := make(color.Palette, 0, len(p)*cnt*2*2*2)
+
+	// make sure palette is compatible with old stuff
 	for _, c := range p {
 		np = append(np, c)
+	}
+
+	for _, c := range p {
 		for i := 0; i < cnt; i++ {
 			var m uint8 = uint8(i) * 5
 			np = append(np,
