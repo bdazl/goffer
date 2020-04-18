@@ -1,4 +1,4 @@
-package main
+package scenes
 
 import (
 	"image"
@@ -7,6 +7,11 @@ import (
 	"math"
 	"math/cmplx"
 	"os"
+
+	"github.com/HexHacks/goffer/pkg/global"
+	jimage "github.com/HexHacks/goffer/pkg/image"
+	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
+	"github.com/HexHacks/goffer/pkg/math/float"
 )
 
 const (
@@ -32,7 +37,7 @@ func (i *ImgImport) getColor(x, y int, t float64) color.Color {
 	// translate into complex coordinat where
 	// [0,0] -> [-1, i]
 	// [W,H] -> [1, -1]
-	z := complex(float64(2*x)/W-1, -float64(2*y)/H+1)
+	z := complex(float64(2*x)/global.W-1, -float64(2*y)/global.H+1)
 
 	//ctt := complex(0, t)
 	// make some transformation
@@ -41,17 +46,17 @@ func (i *ImgImport) getColor(x, y int, t float64) color.Color {
 	//w := 4 * (z + 1/z)
 	//w := cmplx.Log(z)
 	//w := cmplx.Sin(1 / z) // cool!
-	g0 := gaussian(t, 4.0, Total/2.0, 1.0)
+	g0 := float.Gaussian(t, 4.0, global.Total/2.0, 1.0)
 	ct := complex(g0, 0)
 	w := ct * cmplx.Sin(z)
 
 	// interpolate between identity and transformation
 	//g1 := smoothstep(0.0, 1.0, t)
-	g1 := gaussian(t, 1.0, Total/2.0, 1.0)
+	g1 := float.Gaussian(t, 1.0, global.Total/2.0, 1.0)
 	o := z + complex(g1, 0.0)*(z-w)
 
 	// transform back into image coordinates
-	xx, yy := complexToImage(o, W, H, 1.0, 1.0)
+	xx, yy := jcmplx.ToImage(o, global.W, global.H, 1.0, 1.0)
 
 	// modulate to make sure we're always inside image
 	iw, ih := float64(bnds.Max.X), float64(bnds.Max.Y)
@@ -64,10 +69,10 @@ func (i *ImgImport) getColor(x, y int, t float64) color.Color {
 }
 
 func (i *ImgImport) Frame(t float64) image.Image {
-	img, _ := drawCommon(Palette)
+	img, _ := jimage.New()
 
-	for y := 0; y < Height; y++ {
-		for x := 0; x < Width; x++ {
+	for y := 0; y < global.Height; y++ {
+		for x := 0; x < global.Width; x++ {
 			c := i.getColor(x, y, t)
 			img.Set(x, y, c)
 		}
