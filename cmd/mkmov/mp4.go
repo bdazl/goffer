@@ -5,6 +5,8 @@ import (
 	"image"
 	"os"
 
+	"github.com/HexHacks/goffer/pkg/global"
+
 	"github.com/mshafiee/mp4"
 	"github.com/mshafiee/mp4/box"
 )
@@ -19,9 +21,9 @@ var (
 	// creationtime = 0
 	// modificationtine = 0
 	// flags = [3]byte{0, 0, 0}
-	MP4VideoSampleSize = uint32(Width * Height * MP4PerComp * MP4Colors)
-	MP4VideoTimescale  = uint32(FPS) // units / sec
-	MP4VideoDuration   = uint32(FrameCount)
+	MP4VideoSampleSize = uint32(global.Width * global.Height * MP4PerComp * MP4Colors)
+	MP4VideoTimescale  = uint32(global.FPS) // units / sec
+	MP4VideoDuration   = uint32(global.FrameCount)
 	MP4VideoOpColor    = [3]uint16{4, 4, 4} // 32bit ?
 	MP4VideoHdlr       = &box.HdlrBox{
 		//Version     byte
@@ -105,8 +107,8 @@ func mp4Struct(imgs []image.Image) *mp4.MP4 {
 						Volume:         0,
 						Duration:       MP4VideoDuration,
 						Matrix:         mp4Identity(),
-						Width:          box.Fixed32(Width),
-						Height:         box.Fixed32(Height),
+						Width:          box.Fixed32(global.Width),
+						Height:         box.Fixed32(global.Height),
 					},
 					Mdia: &box.MdiaBox{
 						Mdhd: &box.MdhdBox{

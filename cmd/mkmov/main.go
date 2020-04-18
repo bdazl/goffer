@@ -7,45 +7,52 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/HexHacks/goffer/pkg/scenes"
+
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/stat"
 )
 
 // cmd line arguments
 var (
-	FPS        = 30
-	FrameCount = FPS * 4
-	Width      = 512
-	Height     = 512
-	Backup     = false
+	Backup        = false
+	ActiveProject = scenes.LastScene()
+	P             = scenes.Scenes[ActiveProject]
+)
+
+var (
+	OutputFileType = GIF
 )
 
 func main() {
-	flag.IntVar(&FPS, "fps", FPS, "frames per second")
-	flag.IntVar(&FrameCount, "fcount", FrameCount, "frame count")
+	flag.IntVar(&global.FPS, "fps", global.FPS, "frames per second")
+	flag.IntVar(&global.FrameCount, "fcount", global.FrameCount, "frame count")
 	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
 	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
 	flag.Parse()
 
 	rand.Seed(19901231)
-	initGlobals()
 
-	imgs := animate(FrameCount, FPS)
+	P = scenes.Scenes[ActiveProject]
+	global.InitGlobals()
+
+	imgs := animate()
 
 	OutputFile(imgs)
 }
 
-func animate(count int, fps int) []image.Image {
+func animate() []image.Image {
 	t0 := time.Now()
-	out := make([]image.Image, count)
+	out := make([]image.Image, global.FrameCount)
 	P.Init()
 	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
 
 	t1 := time.Now()
-	times := make([]float64, count)
+	times := make([]float64, global.FrameCount)
 
-	ffps := float64(fps)
-	for i := 0; i < count; i++ {
+	ffps := float64(global.FPS)
+	for i := 0; i < global.FrameCount; i++ {
 		t := float64(i) / ffps
 
 		start := time.Now()

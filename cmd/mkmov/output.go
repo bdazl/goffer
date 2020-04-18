@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/HexHacks/goffer/pkg/palette"
 )
 
 type FileType string
@@ -89,7 +92,7 @@ func gifOutputFile(filename string, imgs []image.Image) {
 
 	jiffy := &gif.GIF{
 		Image: encoded,
-		Delay: gifGetDelays(len(imgs), FPS),
+		Delay: gifGetDelays(len(imgs), global.FPS),
 	}
 
 	ofile, err := os.Create(filename)
@@ -104,11 +107,11 @@ func gifOutputFile(filename string, imgs []image.Image) {
 
 func gifEncodeFrame(img image.Image) *image.Paletted {
 	bnds := img.Bounds()
-	out := image.NewPaletted(bnds, Palette)
+	out := image.NewPaletted(bnds, palette.Palette)
 
 	for y := bnds.Min.Y; y < bnds.Max.Y; y++ {
 		for x := bnds.Min.X; x < bnds.Max.X; x++ {
-			idx := Palette.Index(img.At(x, y))
+			idx := palette.Palette.Index(img.At(x, y))
 			out.SetColorIndex(x, y, uint8(idx))
 		}
 	}
