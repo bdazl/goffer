@@ -1,10 +1,16 @@
-package main
+package scenes
 
 import (
 	//"fmt"
 	"image"
 	"image/color"
 	"math"
+
+	"github.com/HexHacks/goffer/pkg/global"
+	jimage "github.com/HexHacks/goffer/pkg/image"
+	"github.com/HexHacks/goffer/pkg/math/float"
+	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
+	"github.com/HexHacks/goffer/pkg/palette"
 
 	//"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/spatial/r2"
@@ -39,14 +45,14 @@ func newOCirc(pts int, r float64, t r2.Vec) *OCirc {
 		ptsf = float64(pts)
 	)
 	out := &OCirc{
-		Root: newCNode(jexpV(0.0, r, t.X, t.Y)),
+		Root: newCNode(jr2.ExpV(0.0, r, t.X, t.Y)),
 		r:    r,
 		t:    t,
 	}
 
 	last := out.Root
 	for i := 1; i < pts; i++ {
-		last.Next = newCNode(jexpV(float64(i)/ptsf, r, t.X, t.Y))
+		last.Next = newCNode(jr2.ExpV(float64(i)/ptsf, r, t.X, t.Y))
 		last = last.Next
 	}
 
@@ -118,10 +124,13 @@ func (o *OnCircle0) Init() {
 		distB = 20.0
 		pts   = 13
 	)
+	var (
+		c = jr2.V(global.CX, global.CY)
+	)
 
 	o.Circs = make([]*OCirc, circs)
 	for i := range o.Circs {
-		circ := newOCirc(pts, r0*float64(i+1), C)
+		circ := newOCirc(pts, r0*float64(i+1), c)
 
 		// set colors
 		p := 0
@@ -147,10 +156,10 @@ func (o *OnCircle0) Frame(t float64) image.Image {
 		isv   = 0.1
 	)
 	var (
-		tzo = t / (Total - DT)
+		tzo = t / (global.Total - global.DT)
 	)
 
-	img, gc := drawCommon(Palette)
+	img, gc := jimage.New()
 
 	for i, c := range o.Circs {
 		fi := float64(i)
@@ -159,13 +168,13 @@ func (o *OnCircle0) Frame(t float64) image.Image {
 
 			// make the wavelet repeat saw: [0, 1] -> [-1, 1] (repeating)
 			saw := 2.0*math.Mod((f+tzo)*2, 2.0) - 1.0
-			r := c.r + amp*c.r*MorletBnd(sigma, saw)
+			r := c.r + amp*c.r*float.MorletBnd(sigma, saw)
 
 			f = f + fis
 
-			n.P = jexpV(f, r, CX, CY)
+			n.P = jr2.ExpV(f, r, global.CX, global.CY)
 		})
-		c.Render(gc, Palette)
+		c.Render(gc, palette.Palette)
 	}
 
 	return img
