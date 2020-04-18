@@ -1,9 +1,10 @@
-package main
+package graph
 
 import (
+	"sync/atomic"
+
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/spatial/r2"
-	"sync/atomic"
 )
 
 var (
