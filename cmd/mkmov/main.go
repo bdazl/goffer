@@ -62,7 +62,7 @@ func animate() []image.Image {
 		ms := getMs(meas)
 		times[i] = ms
 
-		fmt.Printf("seek: %.3fs, build time: %.3fms\n", t, ms)
+		fmt.Printf("frame: %v, seek: %.3fs, build time: %.3fms\n", i, t, ms)
 	}
 
 	fmt.Printf("total build time: %v\n", time.Since(t1))
