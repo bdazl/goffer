@@ -1,9 +1,16 @@
-package main
+package scenes
 
 import (
 	"image"
 	"math"
 	"math/rand"
+
+	"github.com/HexHacks/goffer/pkg/global"
+	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
+
+	jgraph "github.com/HexHacks/goffer/pkg/graph"
+	jimage "github.com/HexHacks/goffer/pkg/image"
+	jmath "github.com/HexHacks/goffer/pkg/math"
 
 	kit "github.com/llgcode/draw2d/draw2dkit"
 
@@ -17,13 +24,13 @@ type frameFulkonstOne struct{}
 func (f frameFulkonstOne) Init() {}
 func (f frameFulkonstOne) Frame(t float64) image.Image {
 	var (
-		w, h   = float64(Width), float64(Height)
+		w, h   = global.W, global.H
 		cx, cy = w / 2.0, h / 2.0
 	)
 
-	img, gc := drawCommon(Palette)
+	img, gc := jimage.New()
 
-	rad := TwoPi * t / Total
+	rad := jmath.Tau * t / global.Total
 	amp := w / 2.0
 	cosp, cosc := amp*math.Cos(rad)+cx, amp*math.Cos(rad/2.0)+cx
 	sinp, sinc := amp*math.Sin(rad)+cy, amp*math.Sin(rad/2.0)+cy
@@ -41,8 +48,8 @@ func (f frameFulkonstOne) Frame(t float64) image.Image {
 
 type frameFulkonstTwo struct {
 	Graph *simple.DirectedGraph
-	Roots []*FixNode
-	Edges map[int64]*WeightEdge
+	Roots []*jgraph.FixNode
+	Edges map[int64]*jgraph.WeightEdge
 }
 
 func (f *frameFulkonstTwo) Init() {
@@ -51,15 +58,18 @@ func (f *frameFulkonstTwo) Init() {
 		dist     = 52.0
 		hdist    = dist / 2.0
 	)
+	var (
+		cx, cy = global.CX, global.CY
+	)
 
 	f.Graph = simple.NewDirectedGraph()
-	f.Edges = make(map[int64]*WeightEdge)
+	f.Edges = make(map[int64]*jgraph.WeightEdge)
 
-	f.Roots = []*FixNode{
-		NewFixNode(r2.Vec{X: CX + hdist, Y: CY + hdist}),
-		NewFixNode(r2.Vec{X: CX - hdist, Y: CY + hdist}),
-		NewFixNode(r2.Vec{X: CX - hdist, Y: CY - hdist}),
-		NewFixNode(r2.Vec{X: CX + hdist, Y: CY - hdist}),
+	f.Roots = []*jgraph.FixNode{
+		jgraph.NewFixNode(r2.Vec{X: cx + hdist, Y: cy + hdist}),
+		jgraph.NewFixNode(r2.Vec{X: cx - hdist, Y: cy + hdist}),
+		jgraph.NewFixNode(r2.Vec{X: cx - hdist, Y: cy - hdist}),
+		jgraph.NewFixNode(r2.Vec{X: cx + hdist, Y: cy - hdist}),
 	}
 
 	for _, r := range f.Roots {
@@ -69,25 +79,25 @@ func (f *frameFulkonstTwo) Init() {
 	for r := 0; r < 4; r++ {
 		var prev graph.Node = f.Roots[r]
 		for i := 0; i < subCount; i++ {
-			prevP := prev.(Positioner).Pos()
-			newNode := NewFluidNode(jexpV(rand.Float64(), dist, prevP.X, prevP.Y),
-				jexpV(rand.Float64(), 2.0, 0.0, 0.0), // vel
-				func(t float64, fn *FluidNode) {
-					var parent Positioner
+			prevP := prev.(jgraph.Positioner).Pos()
+			newNode := jgraph.NewFluidNode(jr2.ExpV(rand.Float64(), dist, prevP.X, prevP.Y),
+				jr2.ExpV(rand.Float64(), 2.0, 0.0, 0.0), // vel
+				func(t float64, fn *jgraph.FluidNode) {
+					var parent jgraph.Positioner
 
 					e := f.Edges[fn.ID()]
-					parent = e.From().(Positioner)
+					parent = e.From().(jgraph.Positioner)
 					parentP := parent.Pos()
 
 					newPos := fn.Base.P.Add(fn.V)
 
 					// normalize lenght
-					fn.Base.P = parentP.Add(normalize(newPos.Sub(parentP)).Scale(e.L))
+					fn.Base.P = parentP.Add(jr2.Normalize(newPos.Sub(parentP)).Scale(e.L))
 				},
 			)
 			f.Graph.AddNode(newNode)
 
-			e := NewWeightEdge(prev, newNode, length(prevP, newNode.Pos()))
+			e := jgraph.NewWeightEdge(prev, newNode, jr2.Length(prevP, newNode.Pos()))
 			f.Graph.SetEdge(e)
 			f.Edges[newNode.ID()] = e
 
@@ -101,13 +111,13 @@ func (f *frameFulkonstTwo) Frame(t float64) image.Image {
 		csiz = 5.0
 	)
 
-	img, gc := drawCommon(Palette)
+	img, gc := jimage.New()
 
 	eiter := f.Graph.Edges()
 	for eiter.Next() {
 		e := eiter.Edge()
-		a := e.From().(Positioner).Pos()
-		b := e.To().(Positioner).Pos()
+		a := e.From().(jgraph.Positioner).Pos()
+		b := e.To().(jgraph.Positioner).Pos()
 
 		gc.MoveTo(a.X, a.Y)
 		gc.LineTo(b.X, b.Y)
@@ -117,12 +127,12 @@ func (f *frameFulkonstTwo) Frame(t float64) image.Image {
 	niter := f.Graph.Nodes()
 	for niter.Next() {
 		n := niter.Node()
-		v := n.(Positioner).Pos()
+		v := n.(jgraph.Positioner).Pos()
 
 		kit.Circle(gc, v.X, v.Y, csiz)
 		gc.FillStroke()
 
-		if u, ok := n.(Updater); ok {
+		if u, ok := n.(jgraph.Updater); ok {
 			u.Update(t)
 		}
 	}
