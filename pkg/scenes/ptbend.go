@@ -1,4 +1,4 @@
-package main
+package scenes
 
 import (
 	"fmt"
@@ -6,6 +6,11 @@ import (
 	"math"
 	"math/cmplx"
 	"math/rand"
+
+	"github.com/HexHacks/goffer/pkg/global"
+	jimage "github.com/HexHacks/goffer/pkg/image"
+	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/HexHacks/goffer/pkg/palette"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 	kit "github.com/llgcode/draw2d/draw2dkit"
@@ -181,7 +186,7 @@ func (p *PtBend0) Step() {
 		stateTime = 1.0 // seconds
 	)
 
-	p.Zo = p.Zo + DT
+	p.Zo = p.Zo + global.DT
 	if p.Zo >= stateTime {
 		p.NextState()
 		p.Zo = 0.0
@@ -195,7 +200,7 @@ func (p *PtBend0) Render(gc *draw2dimg.GraphicContext) {
 	)
 	var (
 		// find max values
-		sstep = smoothstep(0.0, 1.0, p.Zo)
+		sstep = float.Smoothstep(0.0, 1.0, p.Zo)
 		ma    = (p.oldMax + sstep*(p.newMax-p.oldMax)) * 1.3
 		//nolen = float64(len(p.Now))
 		//nelen = float64(len(p.Next))
@@ -212,7 +217,7 @@ func (p *PtBend0) Render(gc *draw2dimg.GraphicContext) {
 
 		scr := ComplexToScreen(lerp, ma)
 
-		gc.SetFillColor(Palette[1+i%3])
+		gc.SetFillColor(palette.Palette[1+i%3])
 		kit.Circle(gc, scr.X, scr.Y, siz)
 		gc.FillStroke()
 	}
@@ -220,13 +225,13 @@ func (p *PtBend0) Render(gc *draw2dimg.GraphicContext) {
 
 func ComplexToScreen(c complex128, ma float64) r2.Vec {
 	return r2.Vec{
-		X: (real(c) + ma) * W / (2.0 * ma),
-		Y: (imag(c) + ma) * H / (2.0 * ma),
+		X: (real(c) + ma) * global.W / (2.0 * ma),
+		Y: (imag(c) + ma) * global.H / (2.0 * ma),
 	}
 }
 
 func (p *PtBend0) Frame(t float64) image.Image {
-	img, gc := drawCommon(Palette)
+	img, gc := jimage.New()
 
 	p.Step()
 	p.Render(gc)

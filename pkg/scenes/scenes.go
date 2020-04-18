@@ -1,21 +1,22 @@
-package main
+package scenes
 
 import (
 	"image"
 )
 
 var (
-	Projects = map[string]Project{
+	Scenes = map[string]Project{
 		"fulkonstett": &frameFulkonstOne{},
 		"fulkonsttvå": &frameFulkonstTwo{},
 		"circ0":       &OnCircle0{},
 		"ptbend0":     &PtBend0{},
 		"imgimport":   &ImgImport{},
 	}
-
-	ActiveProject = "imgimport"
-	P             = Projects[ActiveProject]
 )
+
+func LastScene() string {
+	return "imgimport"
+}
 
 type Project interface {
 	Init()
