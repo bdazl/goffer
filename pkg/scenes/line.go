@@ -25,12 +25,13 @@ func (l *Lines) Init() {
 func (l *Lines) Frame(t float64) image.Image {
 	const (
 		res   = 1000.0
-		lines = 20.0
+		lines = 30.0
 		cY    = -15
 	)
 
 	var (
 		w, h = global.W, global.H
+		tot  = global.Total
 		dY   = h / (lines - 1)
 		dX   = w / res
 		dXzo = dX / (w - 1)
@@ -41,13 +42,16 @@ func (l *Lines) Frame(t float64) image.Image {
 	//gc.ComposeMatrixTransform(draw2d.NewTranslationMatrix(-w/2.0, h/2.0))
 
 	fun := func(x, y float64) float64 {
-		saw := math.Mod(x, 0.3)
-		marker := 20 + saw*20 - float.Gaussian(y, 1.0, 0.5, 5.0/(t+.01))*20. - t
-		return 10.0 * math.Sin(jmath.Tau*t*0.3+y) * float.Morlet(6.0, marker)
+		//saw := math.Mod(x, 0.25) - 1.0
+		marker := 10 + 20.*x - 10.*float.Morlet(4, 3*(y*2-1)) - 20*float.Smoothstep(y, tot, t)
+		wave := 10.0 * math.Sin(jmath.Tau*t*0.2+y*2.0) * float.Morlet(6.0, marker)
+		return wave
 	}
 
-	gc.SetLineWidth(1.5)
+	yy := 0
+	gc.SetLineWidth(2.0)
 	for y := dY; y < h; y += dY {
+		gc.SetStrokeColor(palette.Palette[1+yy%2])
 		gc.MoveTo(0.0, cY+y-fun(-1.0, y/(h-1.0)))
 		for x := dX; x < w; x += dX {
 			xzo := 2*x/(w-1) - 1
@@ -58,6 +62,7 @@ func (l *Lines) Frame(t float64) image.Image {
 			gc.LineTo(nx, ny)
 		}
 		gc.Stroke()
+		yy++
 	}
 
 	return img
