@@ -33,7 +33,7 @@ func (pt *dEqPt) Update(t float64) {
 	//pt.Pos = pt.Pos.Add(pt.Vel)
 }
 
-func (pt *dEqPt) Render(img image.Image, gc *draw2dimg.GraphicContext) {
+func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 	c, _ := colorful.Hex("#ff00ff")
 
 	p := coordsys.UnitToImg(pt.Pos)
