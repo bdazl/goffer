@@ -1,13 +1,17 @@
 package scenes
 
 import (
+	"fmt"
 	"image"
 	"math/rand"
 
 	"github.com/HexHacks/goffer/pkg/coordsys"
+	"github.com/HexHacks/goffer/pkg/global"
 	jimage "github.com/HexHacks/goffer/pkg/image"
+	jmath "github.com/HexHacks/goffer/pkg/math"
 	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
 	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
+	"github.com/HexHacks/goffer/pkg/palette"
 	jpalette "github.com/HexHacks/goffer/pkg/palette"
 	"github.com/llgcode/draw2d/draw2dimg"
 
@@ -30,16 +34,16 @@ func (pt *dEqPt) Update(t float64) {
 	pt.AccPos = append(pt.AccPos, pt.Pos)
 
 	// update position
-	//pt.Pos = pt.Pos.Add(pt.Vel)
+	pt.Pos = pt.Pos.Add(pt.Vel)
 }
 
 func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
-	c, _ := colorful.Hex("#ff00ff")
-
 	p := coordsys.UnitToImg(pt.Pos)
 
-	gc.SetFillColor(c)
-	kit.Circle(gc, p.X, p.Y, 20.0)
+	//fmt.Printf("x: %v, y: %v\n", p.X, p.Y)
+	gc.SetFillColor(palette.Palette[5])
+	kit.Circle(gc, p.X, p.Y, 5.0)
+	gc.FillStroke()
 }
 
 // A field has a bunch of points and a derivative operator for those points
@@ -50,11 +54,15 @@ type dEqField struct {
 }
 
 func (f *dEqField) Update(t float64) {
+	const (
+		speed = 0.1
+	)
 	f.t = t
 
-	for _, pt := range f.Pts {
-		pt.Vel = f.DtOperator(t, pt.Pos)
-		pt.Update(t)
+	for i := range f.Pts {
+		f.Pts[i].Vel = f.DtOperator(t, f.Pts[i].Pos).Scale(speed * global.DT)
+		fmt.Printf("vx: %v, vy: %v\n", f.Pts[i].Vel.X, f.Pts[i].Vel.Y)
+		f.Pts[i].Update(t)
 	}
 }
 
@@ -69,7 +77,7 @@ func (f *dEqField) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 			grad := f.DtOperator(f.t, spc)
 			sph := jr2.ToSpherical(grad)
 
-			img.Set(x, y, c1.BlendHsv(c2, sph.Y))
+			img.Set(x, y, c1.BlendHsv(c2, sph.Y/jmath.Tau))
 		}
 	}
 
@@ -84,7 +92,7 @@ type DiffEq struct {
 
 func NewDiffEq() *DiffEq {
 	const (
-		ptCount = 10
+		ptCount = 100
 	)
 
 	pts := make([]dEqPt, ptCount)
@@ -100,7 +108,7 @@ func NewDiffEq() *DiffEq {
 			DtOperator: func(t float64, spc r2.Vec) r2.Vec {
 				z := complex(spc.X, spc.Y)
 
-				w := (z - 1) / (z + 1) // möbius transformation
+				w := 4 * (z + 1/z)
 
 				return jcmplx.ToVec(w)
 			},
@@ -115,7 +123,7 @@ func (d *DiffEq) Init() {
 func (d *DiffEq) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 
-	//d.Update(t)
+	d.Update(t)
 	d.Render(img, gc)
 
 	return img
