@@ -45,7 +45,7 @@ func (pt *dEqPt) Update(t float64) bool {
 	pt.AccPos = append(pt.AccPos, pp)
 
 	// Go through the trailing points and remove any point completely outside of the screen
-	xi := gr1.Interval{Lo: pp.X, Hi: pp.Y}
+	xi := gr1.Interval{Lo: pp.X, Hi: pp.X}
 	yi := gr1.Interval{Lo: pp.Y, Hi: pp.Y}
 
 	aLen := len(pt.AccPos)
@@ -60,7 +60,7 @@ func (pt *dEqPt) Update(t float64) bool {
 		expand(&yi, b.Y)
 	}
 	r := gr2.Rect{X: xi, Y: yi}
-	return global.WinRect.Contains(r)
+	return global.WinRect.InteriorIntersects(r)
 
 }
 
@@ -78,9 +78,11 @@ func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 		gc.LineTo(b.X, b.Y)
 		gc.Close()
 	}
+	gc.Stroke()
 
 	// render pt
-	gc.SetFillColor(palette.Palette[5])
+	gc.SetStrokeColor(palette.Palette[6])
+	gc.SetFillColor(palette.Palette[8])
 	kit.Circle(gc, p.X, p.Y, 5.0)
 	gc.FillStroke()
 
@@ -163,7 +165,16 @@ func NewDiffEq() *DiffEq {
 			DtOperator: func(t float64, spc r2.Vec) r2.Vec {
 				z := complex(spc.X, spc.Y)
 
-				w := 4 * (z + 1/z)
+				//w := (z + 2) * (z + 2) * (z - 1 - 2i) * (z + 1i)
+				//w := (z - 1) / (z + 1) // möbius transformation
+				//w := cmplx.Exp(complex(0.0, jmath.Tau*t/global.Total)) * z * z
+				//w := cmplx.Sin(1 / z) // cool!
+				//g0 := float.Gaussian(t, 4.0, global.Total/2.0, 1.0)
+				//ct := complex(g0, 0)
+				//cti := complex(0, g0)
+				w := 1 * ((z-2i)*(z+2i) + 1.0/(z*z))
+
+				//w := ct * cmplx.Sin(z)
 
 				return jcmplx.ToVec(w)
 			},
