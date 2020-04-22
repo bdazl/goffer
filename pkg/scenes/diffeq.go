@@ -30,20 +30,38 @@ type dEqPt struct {
 func (pt *dEqPt) Update(t float64) {
 	// assume velocity is not for us to decide
 
-	// add to history of positions
-	pt.AccPos = append(pt.AccPos, pt.Pos)
-
 	// update position
 	pt.Pos = pt.Pos.Add(pt.Vel)
+
+	// add to history of positions
+	pt.AccPos = append(pt.AccPos, pt.Pos)
 }
 
 func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 	p := coordsys.UnitToImg(pt.Pos)
 
-	//fmt.Printf("x: %v, y: %v\n", p.X, p.Y)
+	// render tail
+	aLen := len(pt.AccPos)
+	cnt := min(aLen-1, 5)
+	for i := 0; i < cnt-1; i++ {
+		a := coordsys.UnitToImg(pt.AccPos[aLen-i-1])
+		b := coordsys.UnitToImg(pt.AccPos[aLen-i-2])
+		gc.MoveTo(a.X, a.Y)
+		gc.LineTo(b.X, b.Y)
+		gc.Close()
+	}
+
+	// render pt
 	gc.SetFillColor(palette.Palette[5])
 	kit.Circle(gc, p.X, p.Y, 5.0)
 	gc.FillStroke()
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 // A field has a bunch of points and a derivative operator for those points
