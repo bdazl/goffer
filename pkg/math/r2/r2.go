@@ -24,6 +24,20 @@ func ExpV(f, r, cx, cy float64) r2.Vec {
 
 // VECTORS
 
+func Min(a, b r2.Vec) r2.Vec {
+	return r2.Vec{
+		X: math.Min(a.X, b.X),
+		Y: math.Min(a.Y, b.Y),
+	}
+}
+
+func Max(a, b r2.Vec) r2.Vec {
+	return r2.Vec{
+		X: math.Max(a.X, b.X),
+		Y: math.Max(a.Y, b.Y),
+	}
+}
+
 func Norm(v r2.Vec) float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
