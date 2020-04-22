@@ -12,11 +12,12 @@ var (
 		"ptbend0":     &PtBend0{},
 		"imgimport":   &ImgImport{},
 		"lines":       &Lines{},
+		"diffeq":      NewDiffEq(),
 	}
 )
 
 func LastScene() string {
-	return "lines"
+	return "diffeq"
 }
 
 type Scene interface {
