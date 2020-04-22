@@ -2,6 +2,8 @@ package palette
 
 import (
 	"image/color"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 var (
@@ -14,7 +16,47 @@ var (
 		color.RGBA{0x84, 0xA9, 0xAC, 0xff},
 		color.RGBA{0xCA, 0xE8, 0xD5, 0xff},
 	}
+
+	Debug = color.Palette{
+		rgba("#000000"), // black
+		rgba("#ffffff"), // white
+		rgba("#ff0000"), // red extreme
+		rgba("#00ff00"), // green extreme
+		rgba("#0000ff"), // blue extreme
+		rgba("#ffff00"), // yellow extreme
+		rgba("#ff00ff"), // purple extreme
+		rgba("#00ffff"), // cyan extreme
+
+		// red palette
+		rgba("#a70000"),
+		rgba("#ff0000"),
+		rgba("#ff5252"),
+		rgba("#ff7b7b"),
+		rgba("#ffbaba"),
+
+		// blue palette
+		rgba("#005073"),
+		rgba("#107dac"),
+		rgba("#189ad3"),
+		rgba("#1ebbd7"),
+		rgba("#71c7ec"),
+
+		// green
+		rgba("#006203"),
+		rgba("#0f9200"),
+		rgba("#30cb00"),
+		rgba("#4ae54a"),
+		rgba("#a4fba6"),
+	}
 )
+
+func rgba(hex string) color.Color {
+	c, err := colorful.Hex(hex)
+	if err != nil {
+		panic(err)
+	}
+	return c
+}
 
 func expandPalette(p color.Palette, cnt int) color.Palette {
 	np := make(color.Palette, 0, len(p)*cnt*2*2*2)
