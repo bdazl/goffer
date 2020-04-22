@@ -1,8 +1,8 @@
 package scenes
 
 import (
-	"fmt"
 	"image"
+	"math"
 	"math/rand"
 
 	"github.com/HexHacks/goffer/pkg/coordsys"
@@ -15,9 +15,15 @@ import (
 	jpalette "github.com/HexHacks/goffer/pkg/palette"
 	"github.com/llgcode/draw2d/draw2dimg"
 
+	gr1 "github.com/golang/geo/r1"
+	gr2 "github.com/golang/geo/r2"
 	kit "github.com/llgcode/draw2d/draw2dkit"
 	"github.com/lucasb-eyer/go-colorful"
 	"gonum.org/v1/gonum/spatial/r2"
+)
+
+const (
+	trajectory = 10
 )
 
 type dEqPt struct {
@@ -27,25 +33,47 @@ type dEqPt struct {
 	AccPos []r2.Vec
 }
 
-func (pt *dEqPt) Update(t float64) {
+// returned false implies remove thes point (or repurpose it)
+func (pt *dEqPt) Update(t float64) bool {
 	// assume velocity is not for us to decide
 
 	// update position
 	pt.Pos = pt.Pos.Add(pt.Vel)
+	pp := coordsys.UnitToImg(pt.Pos)
 
 	// add to history of positions
-	pt.AccPos = append(pt.AccPos, pt.Pos)
+	pt.AccPos = append(pt.AccPos, pp)
+
+	// Go through the trailing points and remove any point completely outside of the screen
+	xi := gr1.Interval{Lo: pp.X, Hi: pp.Y}
+	yi := gr1.Interval{Lo: pp.Y, Hi: pp.Y}
+
+	aLen := len(pt.AccPos)
+	cnt := min(aLen-1, trajectory)
+	for i := 0; i < cnt-1; i++ {
+		a, b := pt.AccPos[aLen-i-1], pt.AccPos[aLen-i-2]
+
+		expand(&xi, a.X)
+		expand(&yi, a.Y)
+
+		expand(&xi, b.X)
+		expand(&yi, b.Y)
+	}
+	r := gr2.Rect{X: xi, Y: yi}
+	return global.WinRect.Contains(r)
+
 }
 
+// return false when nothing is rendered
 func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 	p := coordsys.UnitToImg(pt.Pos)
 
 	// render tail
 	aLen := len(pt.AccPos)
-	cnt := min(aLen-1, 5)
+	cnt := min(aLen-1, trajectory)
 	for i := 0; i < cnt-1; i++ {
-		a := coordsys.UnitToImg(pt.AccPos[aLen-i-1])
-		b := coordsys.UnitToImg(pt.AccPos[aLen-i-2])
+		a, b := pt.AccPos[aLen-i-1], pt.AccPos[aLen-i-2]
+
 		gc.MoveTo(a.X, a.Y)
 		gc.LineTo(b.X, b.Y)
 		gc.Close()
@@ -55,6 +83,7 @@ func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 	gc.SetFillColor(palette.Palette[5])
 	kit.Circle(gc, p.X, p.Y, 5.0)
 	gc.FillStroke()
+
 }
 
 func min(a, b int) int {
@@ -62,6 +91,11 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func expand(i *gr1.Interval, c float64) {
+	i.Lo = math.Min(i.Lo, c)
+	i.Hi = math.Max(i.Hi, c)
 }
 
 // A field has a bunch of points and a derivative operator for those points
@@ -79,8 +113,11 @@ func (f *dEqField) Update(t float64) {
 
 	for i := range f.Pts {
 		f.Pts[i].Vel = f.DtOperator(t, f.Pts[i].Pos).Scale(speed * global.DT)
-		fmt.Printf("vx: %v, vy: %v\n", f.Pts[i].Vel.X, f.Pts[i].Vel.Y)
-		f.Pts[i].Update(t)
+		mv := f.Pts[i].Update(t)
+		if !mv {
+			f.Pts[i].Pos = randV()
+			f.Pts[i].AccPos = f.Pts[i].AccPos[:0]
+		}
 	}
 }
 
@@ -117,7 +154,7 @@ func NewDiffEq() *DiffEq {
 
 	for i := range pts {
 		pts[i] = dEqPt{
-			Pos: r2.Vec{X: 2.0*rand.Float64() - 1.0, Y: 2.0*rand.Float64() - 1.0},
+			Pos: randV(),
 		}
 	}
 	return &DiffEq{
@@ -132,6 +169,10 @@ func NewDiffEq() *DiffEq {
 			},
 		},
 	}
+}
+
+func randV() r2.Vec {
+	return r2.Vec{X: 2.0*rand.Float64() - 1.0, Y: 2.0*rand.Float64() - 1.0}
 }
 
 func (d *DiffEq) Init() {
