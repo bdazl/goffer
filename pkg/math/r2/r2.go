@@ -28,10 +28,21 @@ func Norm(v r2.Vec) float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
+func Angle(v r2.Vec) float64 {
+	return math.Acos(v.X / Norm(v))
+}
+
 func Length(a, b r2.Vec) float64 {
 	return Norm(b.Sub(a))
 }
 
 func Normalize(a r2.Vec) r2.Vec {
 	return a.Scale(1.0 / Norm(a))
+}
+
+func ToSpherical(rect r2.Vec) r2.Vec {
+	return r2.Vec{
+		X: Norm(rect),
+		Y: Angle(rect),
+	}
 }
