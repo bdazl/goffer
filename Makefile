@@ -9,5 +9,9 @@ _ptbend:
 _imgimport:
 	go run ./cmd/mkmov -backup -proj imgimport -fcount 160
 
+_diffeq:
+	go run ./cmd/mkmov -backup -proj diffeq -fcount 300
+
 ptbend: _ptbend rsync
 imgimport: _imgimport rsync
+diffeq: _diffeq rsync
