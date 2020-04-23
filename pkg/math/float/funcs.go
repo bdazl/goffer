@@ -1,13 +1,8 @@
 package float
 
 import (
-	"fmt"
 	"math"
 )
-
-func main() {
-	fmt.Println("vim-go")
-}
 
 // MorletReal returns the real part of the morlet wavelet
 // Sigma is nice
@@ -71,6 +66,13 @@ func Clamp(x, low, hi float64) float64 {
 func Gaussian(x, a, b, c float64) float64 {
 	q := x - b
 	return a * exp(-q*q/2*c*c)
+}
+
+// x0 midpoint
+// L maximum value,
+// k growth rate
+func Logistic(x, x0, L, k float64) float64 {
+	return L / (1 + exp(-k*(x-x0)))
 }
 
 // helper
