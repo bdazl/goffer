@@ -2,6 +2,7 @@ package scenes
 
 import (
 	"image"
+	"image/color/palette"
 	"math"
 	"math/rand"
 
@@ -10,8 +11,8 @@ import (
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	jmath "github.com/HexHacks/goffer/pkg/math"
 	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
+	"github.com/HexHacks/goffer/pkg/math/float"
 	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
-	"github.com/HexHacks/goffer/pkg/palette"
 	jpalette "github.com/HexHacks/goffer/pkg/palette"
 	"github.com/llgcode/draw2d/draw2dimg"
 
@@ -81,8 +82,8 @@ func (pt *dEqPt) Render(img *image.RGBA, gc *draw2dimg.GraphicContext) {
 	gc.Stroke()
 
 	// render pt
-	gc.SetStrokeColor(palette.Palette[6])
-	gc.SetFillColor(palette.Palette[8])
+	gc.SetStrokeColor(jpalette.Palette[6])
+	gc.SetFillColor(jpalette.Palette[8])
 	kit.Circle(gc, p.X, p.Y, 5.0)
 	gc.FillStroke()
 
@@ -169,10 +170,10 @@ func NewDiffEq() *DiffEq {
 				//w := (z - 1) / (z + 1) // möbius transformation
 				//w := cmplx.Exp(complex(0.0, jmath.Tau*t/global.Total)) * z * z
 				//w := cmplx.Sin(1 / z) // cool!
-				//g0 := float.Gaussian(t, 4.0, global.Total/2.0, 1.0)
+				g0 := float.Logistic(t, global.Total/2.2, -1.0, 1.0)
 				//ct := complex(g0, 0)
-				//cti := complex(0, g0)
-				w := 1 * ((z-2i)*(z+2i) + 1.0/(z*z))
+				cti := complex(0, g0)
+				w := 1 * ((z-cti)*(z+cti) + 1.0/(z*z))
 
 				//w := ct * cmplx.Sin(z)
 
@@ -187,7 +188,7 @@ func randV() r2.Vec {
 }
 
 func (d *DiffEq) Init() {
-	jpalette.Palette = jpalette.Debug
+	jpalette.Palette = palette.Plan9 //jpalette.Debug
 }
 
 func (d *DiffEq) Frame(t float64) image.Image {
