@@ -22,10 +22,12 @@ var (
 )
 
 var (
-	OutputFileType = GIF
+	OutputFileType = MP4
 )
 
 func main() {
+	start := time.Now()
+
 	flag.IntVar(&global.FPS, "fps", global.FPS, "frames per second")
 	flag.IntVar(&global.FrameCount, "fcount", global.FrameCount, "frame count")
 	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
@@ -40,6 +42,9 @@ func main() {
 	imgs := animate()
 
 	OutputFile(imgs)
+
+	progduration := time.Since(start)
+	fmt.Printf("the program runtime was %v\n", progduration)
 }
 
 func animate() []image.Image {
