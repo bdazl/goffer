@@ -13,11 +13,12 @@ var (
 		"imgimport":   &ImgImport{},
 		"lines":       &Lines{},
 		"diffeq":      NewDiffEq(),
+		"svgepicycle": &SvgEpicycle{},
 	}
 )
 
 func LastScene() string {
-	return "diffeq"
+	return "svgepicycle"
 }
 
 type Scene interface {

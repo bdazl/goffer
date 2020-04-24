@@ -22,6 +22,12 @@ github.com/mshafiee/mp4 v0.0.0-20180318080707-0ad720116a9c h1:VOpGe9kDjJFKLThtXs
 github.com/mshafiee/mp4 v0.0.0-20180318080707-0ad720116a9c/go.mod h1:zZE1oYfnqlhcW8vOASrDRDLbevDI+T2o/dM8BDCAOjA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/rustyoz/Mtransform v0.0.0-20190224104252-60c8c35a3681 h1:+MSiFc2Ocn6tXnJqPK6gD3gMlD/Ku878zak2apGUD0Y=
+github.com/rustyoz/Mtransform v0.0.0-20190224104252-60c8c35a3681/go.mod h1:LoYQicvJKiYtg51aHi/pslb7cyYUevSnMuB5IlkjuF0=
+github.com/rustyoz/genericlexer v0.0.0-20190224115003-eb82fd2987bd h1:Obx9Gkv98ZAIwUAk4g8lmu/0qoSt0C3Rtp25JMd8mGI=
+github.com/rustyoz/genericlexer v0.0.0-20190224115003-eb82fd2987bd/go.mod h1:m65JtsVg785EjQvQylesseVucezoQZqJozlPAfjXmbE=
+github.com/rustyoz/svg v0.0.0-20200324092435-1ce6eba67a99 h1:YBocBgJJmoNoZtrVK9aCjMuIcJ/Bh6rQW/muUkUqxnk=
+github.com/rustyoz/svg v0.0.0-20200324092435-1ce6eba67a99/go.mod h1:fzOwHlLapZc+KrYbBhrUNF9/Mu5VuQjnI2Apt9JQwlI=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
