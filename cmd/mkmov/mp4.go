@@ -21,14 +21,16 @@ func mp4OutputFile(filename string, imgs []image.Image) {
 	baseD := path.Dir(filename)
 	out := path.Base(filename)
 
-	dir := path.Join(baseD, ActiveProject+".d")
-	err := os.MkdirAll(dir, 0775)
+	outDir := path.Join(baseD, ActiveProject+".d")
+	imgDir := path.Join(outDir, "imgs")
+
+	err := os.MkdirAll(imgDir, 0775)
 	panicOn(err)
 
 	times := make([]float64, len(imgs))
 
 	for i, img := range imgs {
-		fileName := path.Join(dir, fmt.Sprintf("%v.png", i))
+		fileName := path.Join(imgDir, fmt.Sprintf("%v.png", i))
 
 		start := time.Now()
 
@@ -49,10 +51,10 @@ func mp4OutputFile(filename string, imgs []image.Image) {
 	fmt.Printf("png enc stats; ")
 	printStats(times)
 
-	ffmpeg(dir, out)
+	ffmpeg(imgDir, outDir, out)
 }
 
-func ffmpeg(folder, out string) {
+func ffmpeg(imgDir, outDir, out string) {
 	//ffmpeg -r 30 -f image2 -s 512x512 -i $1/%d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p $2
 
 	const (
@@ -62,7 +64,7 @@ func ffmpeg(folder, out string) {
 	)
 	var (
 		frameRate = strconv.Itoa(global.FPS)
-		pngFmt    = path.Join(folder, "%d.png")
+		pngFmt    = path.Join(imgDir, "%d.png")
 		dims      = fmt.Sprintf("%vx%v", global.Width, global.Height)
 	)
 
@@ -74,7 +76,7 @@ func ffmpeg(folder, out string) {
 		"-vcodec", codec,
 		"-crf", crf,
 		"-pix_fmt", pixFmt,
-		path.Join(folder, out),
+		path.Join(outDir, out),
 	}
 
 	start := time.Now()
