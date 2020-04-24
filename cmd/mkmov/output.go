@@ -25,10 +25,6 @@ const (
 func OutputFile(imgs []image.Image) {
 	filename := path.Join("out", ActiveProject+"."+string(OutputFileType))
 
-	if Backup {
-		backupOld(filename)
-	}
-
 	switch OutputFileType {
 	case MP4:
 		mp4OutputFile(filename, imgs)
@@ -82,6 +78,10 @@ func fileExists(filename string) bool {
 }
 
 func gifOutputFile(filename string, imgs []image.Image) {
+	if Backup {
+		backupOld(filename)
+	}
+
 	fmt.Println("encoding images with gif palette...")
 	t0 := time.Now()
 	encoded := make([]*image.Paletted, len(imgs))

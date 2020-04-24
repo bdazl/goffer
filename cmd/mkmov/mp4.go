@@ -51,6 +51,13 @@ func mp4OutputFile(filename string, imgs []image.Image) {
 	fmt.Printf("png enc stats; ")
 	printStats(times)
 
+	outFile := path.Join(outDir, out)
+	if Backup {
+		backupOld(outFile)
+	} else if fileExists(outFile) {
+		_ = os.Remove(outFile)
+	}
+
 	ffmpeg(imgDir, outDir, out)
 }
 
@@ -83,6 +90,11 @@ func ffmpeg(imgDir, outDir, out string) {
 
 	fmt.Println("ffmpeg", args)
 	cmd := exec.Command("ffmpeg", args...)
+	if Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
+
 	err := cmd.Run()
 	panicOn(err)
 

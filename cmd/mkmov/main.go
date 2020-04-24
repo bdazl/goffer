@@ -17,6 +17,7 @@ import (
 // cmd line arguments
 var (
 	Backup        = false
+	Verbose       = false
 	ActiveProject = scenes.LastScene()
 	P             = scenes.Scenes[ActiveProject]
 )
@@ -32,6 +33,7 @@ func main() {
 	flag.IntVar(&global.FrameCount, "fcount", global.FrameCount, "frame count")
 	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
 	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
+	flag.BoolVar(&Verbose, "verbose", Verbose, "more output, notably from ffmpeg")
 	flag.Parse()
 
 	rand.Seed(19901231)
