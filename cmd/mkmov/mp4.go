@@ -81,7 +81,7 @@ func ffmpeg(imgDir, outDir, out string) {
 
 	start := time.Now()
 
-	fmt.Printf("ffmpeg %v", args)
+	fmt.Println("ffmpeg", args)
 	cmd := exec.Command("ffmpeg", args...)
 	err := cmd.Run()
 	panicOn(err)
