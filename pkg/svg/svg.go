@@ -35,10 +35,11 @@ type Path struct {
 }
 
 func (p *Path) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	/*var s string
+	// need to consume the element?
+	var s string
 	if err := d.DecodeElement(&s, &start); err != nil {
 		return err
-	}*/
+	}
 
 	fmt.Printf("Unmarshal Path Local: %v, Space: %v\n", start.Name.Local, start.Name.Space)
 	for _, a := range start.Attr {
