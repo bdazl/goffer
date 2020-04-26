@@ -1,6 +1,7 @@
 package svg
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,9 @@ m 10.0,20.0 c 0,0 10.0,20.0 -10.0,20.0 -10.0,-20.0
 `
 	)
 
+	_, err := parsePath("")
+	assert.Error(t, err)
+
 	exp := []Operation{
 		Operation{
 			Type:   Move,
@@ -39,7 +43,12 @@ m 10.0,20.0 c 0,0 10.0,20.0 -10.0,20.0 -10.0,-20.0
 
 	ops, err := parsePath(simplePath)
 	assert.NoError(t, err)
+	assertOps(t, exp, ops)
 
+	upperPath := strings.ToUpper(simplePath)
+
+	ops, err = parsePath(upperPath)
+	assert.NoError(t, err)
 	assertOps(t, exp, ops)
 }
 

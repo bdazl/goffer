@@ -66,7 +66,6 @@ type Operation struct {
 type Point struct {
 	X, Y float64
 }
-
 type OperationType int
 
 const (
@@ -76,7 +75,7 @@ const (
 
 func parsePath(ops string) ([]Operation, error) {
 	parser := pathParser{
-		tokens:     strings.Split(ops, " "),
+		tokens:     strings.Fields(ops),
 		operations: []Operation{},
 	}
 
@@ -98,7 +97,7 @@ func (p *pathParser) Parse() ([]Operation, error) {
 	}
 
 	var lex lexFunc = p.operation
-	for lex != nil {
+	for lex != nil && p.at < len(p.tokens) {
 		lex = lex(p.tokens[p.at])
 	}
 
@@ -108,6 +107,14 @@ func (p *pathParser) Parse() ([]Operation, error) {
 func (p *pathParser) next() bool {
 	p.at++
 	return p.at < len(p.tokens)
+}
+
+func (p *pathParser) get() string {
+	if p.at < len(p.tokens) {
+		return p.tokens[p.at]
+	} else {
+		return ""
+	}
 }
 
 func (p *pathParser) peek() string {
@@ -171,9 +178,11 @@ func (p *pathParser) operation(s string) lexFunc {
 		return nil
 	}
 
+	s = strings.ToLower(s)
 	if !isLetter(s) {
 		return p.errorf("bad draw instruction: %v", s)
 	}
+
 	if s == "m" {
 		p.next()
 		return p.move
@@ -208,16 +217,18 @@ func (p *pathParser) curve(s string) lexFunc {
 
 	if !p.curveInit {
 		p.operations = append(p.operations, Operation{
-			Type:   Move,
+			Type:   Curve,
 			Points: []Point{pt},
 		})
+
+		p.curveInit = true
 	} else {
 		l := len(p.operations) - 1
 		p.operations[l].Points = append(p.operations[l].Points, pt)
 	}
 
 	p.next()
-	if isLetter(p.peek()) {
+	if isLetter(p.get()) {
 		p.curveInit = false
 		return p.operation
 	}
