@@ -7,6 +7,17 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+type OperationType int
+
+const (
+	Move OperationType = iota + 1
+	MoveRel
+	Cubic
+	CubicRel // relative to prior instr
 )
 
 type Svg struct {
@@ -67,12 +78,6 @@ type Operation struct {
 type Point struct {
 	X, Y float64
 }
-type OperationType int
-
-const (
-	Move OperationType = iota + 1
-	Curve
-)
 
 func parsePath(ops string) ([]Operation, error) {
 	parser := pathParser{
@@ -89,6 +94,7 @@ type pathParser struct {
 	tokens     []string
 	operations []Operation
 	curveInit  bool
+	relative   bool
 	err        error
 }
 
@@ -179,17 +185,24 @@ func (p *pathParser) operation(s string) lexFunc {
 		return nil
 	}
 
-	s = strings.ToLower(s)
 	if !isLetter(s) {
 		return p.errorf("bad draw instruction: %v", s)
 	}
 
-	if s == "m" {
+	r, _ := utf8.DecodeRuneInString(s)
+	if unicode.IsUpper(r) {
+		p.relative = false
+	} else {
+		p.relative = true
+	}
+
+	l := strings.ToLower(s)
+	if l == "m" {
 		p.next()
 		return p.move
-	} else if s == "c" {
+	} else if l == "c" {
 		p.next()
-		return p.curve
+		return p.cubic
 	}
 
 	return p.errorf("internal operation error")
@@ -206,11 +219,15 @@ func (p *pathParser) move(s string) lexFunc {
 		Points: []Point{pt},
 	})
 
+	if p.relative {
+		p.operations[len(p.operations)-1].Type = MoveRel
+	}
+
 	p.next()
 	return p.operation
 }
 
-func (p *pathParser) curve(s string) lexFunc {
+func (p *pathParser) cubic(s string) lexFunc {
 	pt, err := parsePoint(s)
 	if err != nil {
 		return p.errorf("curve operation requires point")
@@ -218,9 +235,13 @@ func (p *pathParser) curve(s string) lexFunc {
 
 	if !p.curveInit {
 		p.operations = append(p.operations, Operation{
-			Type:   Curve,
+			Type:   Cubic,
 			Points: []Point{pt},
 		})
+
+		if p.relative {
+			p.operations[len(p.operations)-1].Type = CubicRel
+		}
 
 		p.curveInit = true
 	} else {
@@ -234,7 +255,7 @@ func (p *pathParser) curve(s string) lexFunc {
 		return p.operation
 	}
 
-	return p.curve
+	return p.cubic
 }
 
 func (p *pathParser) errorf(s string, args ...string) lexFunc {

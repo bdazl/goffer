@@ -24,11 +24,11 @@ m 10.0,20.0 c 0,0 10.0,20.0 -10.0,20.0 -10.0,-20.0
 
 	exp := []Operation{
 		Operation{
-			Type:   Move,
+			Type:   MoveRel,
 			Points: []Point{Point{10.0, 20.0}},
 		},
 		Operation{
-			Type: Curve,
+			Type: CubicRel,
 			Points: []Point{
 				Point{0.0, 0.0},
 				Point{10.0, 20.0},
@@ -41,6 +41,9 @@ m 10.0,20.0 c 0,0 10.0,20.0 -10.0,20.0 -10.0,-20.0
 	ops, err := parsePath(simplePath)
 	assert.NoError(t, err)
 	assertOps(t, exp, ops)
+
+	exp[0].Type = Move
+	exp[1].Type = Cubic
 
 	upperPath := strings.ToUpper(simplePath)
 
