@@ -2,12 +2,15 @@ package scenes
 
 import (
 	"image"
+	"image/draw"
 	"math/cmplx"
 	"os"
 
 	"github.com/HexHacks/goffer/pkg/global"
 	jmath "github.com/HexHacks/goffer/pkg/math"
+	"github.com/HexHacks/goffer/pkg/palette"
 	"github.com/HexHacks/goffer/pkg/svg"
+	"github.com/llgcode/draw2d/draw2dimg"
 	"gonum.org/v1/gonum/dsp/fourier"
 	"gonum.org/v1/gonum/spatial/r2"
 
@@ -15,9 +18,10 @@ import (
 )
 
 type SvgEpicycle struct {
-	svgPts []complex128
-	coeff  []complex128
-	fft    *fourier.CmplxFFT
+	origPts []r2.Vec
+	svgPts  []complex128
+	coeff   []complex128
+	fft     *fourier.CmplxFFT
 
 	// running the fourier version will leave us with some
 	// points that we want to draw lines through
@@ -34,8 +38,8 @@ func (se *SvgEpicycle) Init() {
 	s, err := svg.ParseSvg(fil)
 	panicOn(err)
 
-	curve := ExtractPoints(s)
-	se.svgPts = ExpandCurve(curve, 10)
+	se.origPts = ExtractPoints(s)
+	se.svgPts = ExpandCurve(se.origPts, 10)
 
 	se.fft = fourier.NewCmplxFFT(len(se.svgPts))
 	se.coeff = se.fft.Coefficients(nil, se.svgPts)
@@ -46,14 +50,14 @@ func ExpandCurve(curve []r2.Vec, perBezier int) []complex128 {
 
 	l := len(curve)
 	out := make([]complex128, 0, l*perBezier)
-	for i := 0; i < l; i = i + 2 {
-		if l <= i+2 {
+	for i := 0; i < l; i = i + 3 {
+		if l <= i+3 {
 			break
 		}
-		a, b, c := curve[i], curve[i+1], curve[i+2]
+		a, b, c, d := curve[i], curve[i+1], curve[i+2], curve[i+3]
 
 		for j := 0.0; j < pB; j = j + 1.0 {
-			p := bezier(j/pB, a, b, c)
+			p := cBezier(j/pB, a, b, c, d)
 			out = append(out, complex(p.X, p.Y))
 		}
 	}
@@ -78,24 +82,33 @@ func ExtractPoints(s *svg.Svg) []r2.Vec {
 		}
 
 		// seems like this should be reset...
-		rel.X, rel.Y = 0.0, 0.0
+		//rel.X, rel.Y = 0.0, 0.0
 	}
 	return curve
 }
 
 // t [0, 1]
-func bezier(t float64, a, b, c r2.Vec) r2.Vec {
-	v, w := b.Sub(a), c.Sub(b)
+func qBezier(t float64, a, b, c r2.Vec) r2.Vec {
+	omT := 1.0 - t
+	p0 := a.Scale(omT * omT)
+	p1 := b.Scale(2 * t * omT)
+	p2 := b.Scale(t * t)
+	return p0.Add(p1).Add(p2)
+}
 
-	n0, n1 := a.Add(v.Scale(t)), b.Add(w.Scale(t))
-	return n0.Add(n1.Sub(n0).Scale(t))
+func cBezier(t float64, a, b, c, d r2.Vec) r2.Vec {
+	omT := 1.0 - t
+	p0 := qBezier(t, a, b, c).Scale(omT)
+	p1 := qBezier(t, b, c, d).Scale(t)
+	return p0.Add(p1)
 }
 
 func (se *SvgEpicycle) Fourier(s float64) r2.Vec {
 	out := 0 + 0i
 	w := complex(s*jmath.Tau/global.Total, 0)
 	for i, c := range se.coeff {
-		n := complex(float64(se.fft.ShiftIdx(i)), 0)
+		n := complex(float64(i-len(se.coeff)/2), 0)
+
 		freq := complex(se.fft.Freq(i), 0)
 
 		next := c * cmplx.Exp(w*freq*n)
@@ -110,18 +123,32 @@ func (se *SvgEpicycle) Fourier(s float64) r2.Vec {
 
 func (se *SvgEpicycle) Frame(s float64) image.Image {
 	img, gc := jimage.New()
+	draw.Draw(img, img.Bounds(), &image.Uniform{palette.Palette[0]}, image.ZP, draw.Src)
 
 	// make new point and add it to list
 	v := se.Fourier(s)
 	se.pts = append(se.pts, v)
 
+	DrawLines(gc, CmplxSliceToVec(se.svgPts))
+
+	return img
+}
+
+func DrawLines(gc *draw2dimg.GraphicContext, pts []r2.Vec) {
 	// draw line through all points
-	gc.MoveTo(se.pts[0].X, se.pts[0].Y)
-	for i := 0; i < len(se.pts); i++ {
-		gc.LineTo(se.pts[i].X, se.pts[i].Y)
+	gc.MoveTo(pts[0].X, pts[0].Y)
+	for i := 0; i < len(pts); i++ {
+		gc.LineTo(pts[i].X, pts[i].Y)
 	}
 	gc.Close()
 	gc.Stroke()
+}
 
-	return img
+func CmplxSliceToVec(cslic []complex128) []r2.Vec {
+	out := make([]r2.Vec, len(cslic))
+	for i, c := range cslic {
+		out[i].X = real(c)
+		out[i].Y = imag(c)
+	}
+	return out
 }
