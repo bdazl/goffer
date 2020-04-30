@@ -1,6 +1,9 @@
 package cmplx
 
-import "gonum.org/v1/gonum/spatial/r2"
+import (
+	"gonum.org/v1/gonum/integrate"
+	"gonum.org/v1/gonum/spatial/r2"
+)
 
 // Complex functions
 // w: width of image
@@ -16,4 +19,25 @@ func ToVec(c complex128) r2.Vec {
 		X: real(c),
 		Y: imag(c),
 	}
+}
+
+// Integrate a complex valued function with a real domain
+func Integrate(a, b float64, c []complex128) complex128 {
+	if b < a {
+		panic("bad input")
+	}
+
+	dx := (b - a) / float64(len(c)-1)
+
+	x := make([]float64, len(c))
+	u := make([]float64, len(c))
+	v := make([]float64, len(c))
+
+	for i := range x {
+		x[i] = a + dx*float64(i)
+		u[i] = real(c[i])
+		v[i] = imag(c[i])
+	}
+
+	return complex(integrate.Trapezoidal(x, u), integrate.Trapezoidal(x, v))
 }
