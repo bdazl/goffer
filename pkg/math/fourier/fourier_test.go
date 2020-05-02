@@ -1,6 +1,7 @@
 package fourier
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -39,10 +40,18 @@ func TestFourier(t *testing.T) {
 			assert.InDelta(t, 0.0, imag(c), eps)
 			assert.InDelta(t, real(expc[i]), real(c), eps)
 		}
+
+		for i := range path {
+			fl := float64(i) / float64(len(path)-1)
+			p := P(fl, coef)
+
+			assert.InDelta(t, 1.0, real(p), eps)
+			assert.InDelta(t, 0.0, imag(p), eps)
+		}
 	}
 	{
 		// F(x) = x
-		cnt := 1000
+		cnt := 100
 		path := make([]complex128, cnt)
 		for i := range path {
 			fi := float64(i)
@@ -58,24 +67,39 @@ func TestFourier(t *testing.T) {
 			fn := float64(n)
 			return complex(0, math.Pow(-1.0, fn)/fn)
 		}
-		cnt = 11
+
+		o := 10
+		cnt = 2*o + 1
 		hcnt := cnt / 2
-		expc := make([]complex128, 11)
+		expc := make([]complex128, cnt)
 		for i := range expc {
 			n := i - hcnt
 			expc[i] = C(n)
 		}
 
-		coef := Coefficients(path, 5)
+		coef := Coefficients(path, o)
 
-		/*for i, c := range coef {
+		for i, c := range coef {
 			a, b := imag(expc[i]), imag(c)
 			fmt.Printf("%.5f - %.5f = %.5f\n", a, b, a-b)
-		}*/
+		}
 
 		for i, c := range coef {
 			assert.InDelta(t, 0.0, real(c), eps)
-			assert.InDelta(t, imag(expc[i]), imag(c), eps)
+			assert.InDelta(t, imag(expc[i]), imag(c), 2e-2)
 		}
+
+		// Seems to converge, but endpoints are quite bad.
+		// Not sure if there is anything to do here
+		/*for i, ep := range path {
+			fl := float64(i) / float64(len(path)-1)
+			p := P(fl, coef)
+
+			a, b := real(ep), real(p)
+			fmt.Printf("%.5f - %.5f = %.5f\n", a, b, a-b)
+
+			assert.InDelta(t, real(ep), real(p), eps)
+			assert.InDelta(t, imag(ep), imag(p), eps)
+		}*/
 	}
 }
