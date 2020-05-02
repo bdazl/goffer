@@ -26,3 +26,20 @@ func UnitToImg(unit r2.Vec) r2.Vec {
 		Y: (h - h*unit.Y) / 2.0,
 	}
 }
+
+func ImgToUnitC(c complex128) complex128 {
+	return complex(
+		2.0*real(c)/global.W-1.0,
+		-2.0*imag(c)/global.H+1.0,
+	)
+}
+
+// Inverse of ImgToCdom (so go from a unit domain
+func UnitToImgC(c complex128) complex128 {
+	x, y := real(c), imag(c)
+	w, h := global.W, global.H
+	return complex(
+		(w*x+w)/2.0,
+		(h-h*y)/2.0,
+	)
+}
