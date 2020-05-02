@@ -29,6 +29,8 @@ type SvgEpicycle struct {
 func (se *SvgEpicycle) Init() {
 	const (
 		perBezier = 100
+		imgScale  = 3.8
+		coefOrder = 50
 	)
 
 	fil, err := os.Open("assets/gubb_abs.svg")
@@ -40,8 +42,8 @@ func (se *SvgEpicycle) Init() {
 
 	se.operations = s.Groups[0].Paths[0].Operations
 	se.origPts = ExtractPoints(s)
-	se.svgPts = ExpandCurve(se.origPts, perBezier, 3.8)
-	se.coeff = fourier.Coefficients(se.svgPts, 20)
+	se.svgPts = ExpandCurve(se.origPts, perBezier, imgScale)
+	se.coeff = fourier.Coefficients(se.svgPts, coefOrder)
 
 	loopCount := len(se.svgPts)
 	se.pts = make([]complex128, loopCount)
