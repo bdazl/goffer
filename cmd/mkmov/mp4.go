@@ -65,7 +65,7 @@ func ffmpeg(imgDir, outDir, out string) {
 	//ffmpeg -r 30 -f image2 -s 512x512 -i $1/%d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p $2
 
 	const (
-		crf    = "25" // quality: lower is better, according to docs: "15-25 is usually good"
+		crf    = "20" // quality: lower is better, according to docs: "15-25 is usually good"
 		codec  = "libx264"
 		pixFmt = "yuv420p"
 	)
