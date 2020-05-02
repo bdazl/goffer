@@ -18,6 +18,7 @@ const (
 	MoveRel
 	Cubic
 	CubicRel // relative to prior instr
+	Close    // use the first point
 )
 
 type Svg struct {
@@ -106,6 +107,7 @@ func (p *pathParser) Parse() ([]Operation, error) {
 	var lex lexFunc = p.operation
 	for lex != nil && p.at < len(p.tokens) {
 		lex = lex(p.tokens[p.at])
+		p.next()
 	}
 
 	return p.operations, p.err
@@ -153,6 +155,8 @@ func isLetter(s string) bool {
 		return true
 	case "c":
 		return true
+	case "z":
+		return true
 	default:
 		return false
 	}
@@ -198,11 +202,11 @@ func (p *pathParser) operation(s string) lexFunc {
 
 	l := strings.ToLower(s)
 	if l == "m" {
-		p.next()
 		return p.move
 	} else if l == "c" {
-		p.next()
 		return p.cubic
+	} else if l == "z" {
+		return p.close(s) // evaluate, because there are no params
 	}
 
 	return p.errorf("internal operation error")
@@ -223,7 +227,6 @@ func (p *pathParser) move(s string) lexFunc {
 		p.operations[len(p.operations)-1].Type = MoveRel
 	}
 
-	p.next()
 	return p.operation
 }
 
@@ -249,13 +252,20 @@ func (p *pathParser) cubic(s string) lexFunc {
 		p.operations[l].Points = append(p.operations[l].Points, pt)
 	}
 
-	p.next()
-	if isLetter(p.get()) {
+	if isLetter(p.peek()) {
 		p.curveInit = false
 		return p.operation
 	}
 
 	return p.cubic
+}
+
+func (p *pathParser) close(s string) lexFunc {
+	p.operations = append(p.operations, Operation{
+		Type: Close,
+	})
+
+	return nil // always exit here
 }
 
 func (p *pathParser) errorf(s string, args ...string) lexFunc {
