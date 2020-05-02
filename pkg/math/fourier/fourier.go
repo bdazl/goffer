@@ -58,3 +58,10 @@ func P(t float64, coef []complex128) complex128 {
 	}
 	return out
 }
+
+func Pat(t float64, coef []complex128, idx int) complex128 {
+	t = T2*t - T
+	h := len(coef) / 2
+	n := float64(idx - h)
+	return coef[idx] * cmplx.Exp(complex(0, n*t))
+}
