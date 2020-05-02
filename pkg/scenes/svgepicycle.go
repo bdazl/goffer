@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	"math/cmplx"
 	"os"
+	"sort"
 
+	"github.com/HexHacks/goffer/pkg/coordsys"
 	"github.com/HexHacks/goffer/pkg/global"
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/math/fourier"
@@ -13,6 +16,7 @@ import (
 	"github.com/HexHacks/goffer/pkg/svg"
 
 	"github.com/llgcode/draw2d/draw2dimg"
+	kit "github.com/llgcode/draw2d/draw2dkit"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
@@ -21,10 +25,24 @@ type SvgEpicycle struct {
 	operations []svg.Operation
 	origPts    []r2.Vec
 	svgPts     []complex128
+	shift      []complex128
 	coeff      []complex128
+	sorted     coeffs
 
 	pts []complex128
 }
+
+type coefSort struct {
+	idx  int
+	coef complex128
+}
+
+type coeffs []coefSort
+
+// Sort by coef magnitude, largest first
+func (a coeffs) Len() int           { return len(a) }
+func (a coeffs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a coeffs) Less(i, j int) bool { return cmplx.Abs(a[i].coef) > cmplx.Abs(a[j].coef) }
 
 func (se *SvgEpicycle) Init() {
 	const (
@@ -43,7 +61,16 @@ func (se *SvgEpicycle) Init() {
 	se.operations = s.Groups[0].Paths[0].Operations
 	se.origPts = ExtractPoints(s)
 	se.svgPts = ExpandCurve(se.origPts, perBezier, imgScale)
-	se.coeff = fourier.Coefficients(se.svgPts, coefOrder)
+	se.shift = ShiftPoints(se.svgPts)
+	se.coeff = fourier.Coefficients(se.shift, coefOrder)
+
+	se.sorted = make(coeffs, len(se.coeff))
+	for i, c := range se.coeff {
+		se.sorted[i].idx = i
+		se.sorted[i].coef = c
+	}
+
+	sort.Sort(se.sorted)
 
 	loopCount := len(se.svgPts)
 	se.pts = make([]complex128, loopCount)
@@ -112,6 +139,22 @@ func ExtractPoints(s *svg.Svg) []r2.Vec {
 	return curve
 }
 
+func ShiftPoints(pts []complex128) []complex128 {
+	/*var center r2.Vec
+	for _, p := range pts {
+		center.Add(p)
+	}
+
+	center.Scale(-1.0 / float64(len(pts)))*/
+
+	out := make([]complex128, len(pts))
+	for i := range out {
+		out[i] = coordsys.ImgToUnitC(pts[i])
+	}
+
+	return out
+}
+
 // t [0, 1]
 func qBezier(t float64, a, b, c r2.Vec) r2.Vec {
 	omT := 1.0 - t
@@ -128,7 +171,7 @@ func cBezier(t float64, a, b, c, d r2.Vec) r2.Vec {
 	return p0.Add(p1)
 }
 
-func (se *SvgEpicycle) Frame(s float64) image.Image {
+func (se *SvgEpicycle) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	draw.Draw(img, img.Bounds(), &image.Uniform{palette.Palette[0]}, image.ZP, draw.Src)
 
@@ -140,6 +183,7 @@ func (se *SvgEpicycle) Frame(s float64) image.Image {
 	//DrawLines(gc, CmplxSliceToVec(se.svgPts))
 	perFrame := len(se.pts) / global.FrameCount
 	DrawCmplxLines(gc, se.pts, se.F*perFrame)
+	se.DrawEpiCircles(gc, t)
 
 	se.F++
 
@@ -177,9 +221,11 @@ func (se *SvgEpicycle) DrawOp(gc *draw2dimg.GraphicContext) {
 
 func DrawLines(gc *draw2dimg.GraphicContext, pts []r2.Vec) {
 	// draw line through all points
-	gc.MoveTo(pts[0].X, pts[0].Y)
+	p := coordsys.UnitToImg(pts[0])
+	gc.MoveTo(p.X, p.Y)
 	for i := 0; i < len(pts); i++ {
-		gc.LineTo(pts[i].X, pts[i].Y)
+		p = coordsys.UnitToImg(pts[i])
+		gc.LineTo(p.X, p.Y)
 	}
 	gc.Stroke()
 }
@@ -189,11 +235,47 @@ func DrawCmplxLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
 		count = len(pts) - 1
 	}
 
+	gc.SetStrokeColor(palette.Palette[3])
 	// draw line through all points
-	gc.MoveTo(real(pts[0]), imag(pts[0]))
+	p := coordsys.UnitToImgC(pts[0])
+	gc.MoveTo(real(p), imag(p))
 	for i := 0; i < count; i++ {
-		gc.LineTo(real(pts[i]), imag(pts[i]))
+		p := coordsys.UnitToImgC(pts[i])
+		gc.LineTo(real(p), imag(p))
 	}
+	gc.Stroke()
+}
+
+func (se *SvgEpicycle) DrawEpiCircles(gc *draw2dimg.GraphicContext, t float64) {
+	h := len(se.coeff) / 2
+	center := complex(0, 0)
+
+	for i := 0; i < len(se.sorted); i++ {
+		srt := se.sorted[i]
+		p := fourier.Pat(t/(global.Total-global.DT), se.coeff, srt.idx)
+
+		// don't draw the static one
+		if srt.idx != h {
+			DrawCCirc(gc, center, p)
+		}
+
+		center += p
+	}
+
+}
+
+func DrawCCirc(gc *draw2dimg.GraphicContext, center, coef complex128) {
+	cent := coordsys.UnitToImgC(complex(0, 0))
+	t, c := coordsys.UnitToImgC(center), coordsys.UnitToImgC(coef)
+	tc := c - cent
+
+	gc.SetStrokeColor(palette.Palette[1])
+	kit.Circle(gc, real(t), imag(t), cmplx.Abs(tc))
+	gc.Stroke()
+
+	gc.SetStrokeColor(palette.Palette[2])
+	gc.MoveTo(real(t), imag(t))
+	gc.LineTo(real(t+tc), imag(t+tc))
 	gc.Stroke()
 }
 
