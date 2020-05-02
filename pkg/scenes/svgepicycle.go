@@ -8,8 +8,8 @@ import (
 	"os"
 	"sort"
 
+	"github.com/HexHacks/goffer/pkg/animation"
 	"github.com/HexHacks/goffer/pkg/coordsys"
-	"github.com/HexHacks/goffer/pkg/global"
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/math/fourier"
 	"github.com/HexHacks/goffer/pkg/palette"
@@ -30,6 +30,9 @@ type SvgEpicycle struct {
 	sorted     coeffs
 
 	pts []complex128
+
+	anim    *animation.Animation
+	currImg image.Image
 }
 
 type coefSort struct {
@@ -79,6 +82,48 @@ func (se *SvgEpicycle) Init() {
 		fi := float64(i)
 		se.pts[i] = fourier.P(fi/lcf, se.coeff)
 	}
+
+	common := func() *draw2dimg.GraphicContext {
+		img, gc := jimage.New()
+		draw.Draw(img,
+			img.Bounds(),
+			&image.Uniform{palette.Palette[0]},
+			image.ZP, draw.Src)
+
+		se.currImg = img
+		return gc
+	}
+
+	anim0 := func(t float64) {
+		gc := common()
+		cnt := int(t * float64(len(se.sorted)))
+		se.DrawEpiCircles(gc, 0, cnt)
+	}
+
+	anim1 := func(t float64) {
+		gc := common()
+		se.DrawEpiCircles(gc, t, len(se.sorted))
+
+		cnt := int(t * float64(len(se.pts)))
+		DrawCmplxLines(gc, se.pts, cnt)
+	}
+
+	anim2 := func(t float64) {
+		gc := common()
+
+		if t < 0.5 {
+			cnt := int((1 - t*2) * float64(len(se.sorted)))
+			se.DrawEpiCircles(gc, 1.0, cnt)
+		}
+
+		DrawCmplxLines(gc, se.pts, len(se.pts))
+	}
+
+	se.anim = animation.New([]animation.Animator{
+		anim0, anim1, anim2,
+	},
+		[]float64{0.15, 0.5, 0.35},
+	)
 }
 
 func ExpandCurve(curve []r2.Vec, perBezier int, scale float64) []complex128 {
@@ -172,22 +217,18 @@ func cBezier(t float64, a, b, c, d r2.Vec) r2.Vec {
 }
 
 func (se *SvgEpicycle) Frame(t float64) image.Image {
-	img, gc := jimage.New()
+	/*img, gc := jimage.New()
 	draw.Draw(img, img.Bounds(), &image.Uniform{palette.Palette[0]}, image.ZP, draw.Src)
 
-	// make new point and add it to list
-	//v := se.InverseFTransform(s)
-	//se.pts = append(se.pts, v)
-
-	//se.DrawOp(gc)
-	//DrawLines(gc, CmplxSliceToVec(se.svgPts))
 	perFrame := len(se.pts) / global.FrameCount
 	DrawCmplxLines(gc, se.pts, se.F*perFrame)
 	se.DrawEpiCircles(gc, t)
 
-	se.F++
+	se.F++*/
 
-	return img
+	se.anim.Frame(t)
+
+	return se.currImg
 }
 
 func (se *SvgEpicycle) DrawOp(gc *draw2dimg.GraphicContext) {
@@ -246,17 +287,33 @@ func DrawCmplxLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
 	gc.Stroke()
 }
 
-func (se *SvgEpicycle) DrawEpiCircles(gc *draw2dimg.GraphicContext, t float64) {
+func (se *SvgEpicycle) DrawEpiCircles(gc *draw2dimg.GraphicContext, t float64, count int) {
+
+	if count >= len(se.sorted) {
+		count = len(se.sorted) - 1
+	}
+
 	h := len(se.coeff) / 2
 	center := complex(0, 0)
-
-	for i := 0; i < len(se.sorted); i++ {
+	for i := 0; i < count; i++ {
 		srt := se.sorted[i]
-		p := fourier.Pat(t/(global.Total-global.DT), se.coeff, srt.idx)
+		p := fourier.Pat(t, se.coeff, srt.idx)
 
 		// don't draw the static one
 		if srt.idx != h {
 			DrawCCirc(gc, center, p)
+		}
+
+		center += p
+	}
+
+	center = complex(0, 0)
+	for i := 0; i < count; i++ {
+		srt := se.sorted[i]
+		p := fourier.Pat(t, se.coeff, srt.idx)
+
+		if srt.idx != h {
+			DrawCLine(gc, center, p)
 		}
 
 		center += p
@@ -272,6 +329,12 @@ func DrawCCirc(gc *draw2dimg.GraphicContext, center, coef complex128) {
 	gc.SetStrokeColor(palette.Palette[1])
 	kit.Circle(gc, real(t), imag(t), cmplx.Abs(tc))
 	gc.Stroke()
+}
+
+func DrawCLine(gc *draw2dimg.GraphicContext, center, coef complex128) {
+	cent := coordsys.UnitToImgC(complex(0, 0))
+	t, c := coordsys.UnitToImgC(center), coordsys.UnitToImgC(coef)
+	tc := c - cent
 
 	gc.SetStrokeColor(palette.Palette[2])
 	gc.MoveTo(real(t), imag(t))
