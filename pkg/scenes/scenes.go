@@ -14,11 +14,12 @@ var (
 		"lines":       &Lines{},
 		"diffeq":      NewDiffEq(),
 		"svgepicycle": &SvgEpicycle{},
+		"epiopti":     &EpiOpti{},
 	}
 )
 
 func LastScene() string {
-	return "svgepicycle"
+	return "epiopti"
 }
 
 type Scene interface {
