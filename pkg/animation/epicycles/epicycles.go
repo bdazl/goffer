@@ -111,18 +111,24 @@ func (e *Epicycles) Frame(t float64) image.Image {
 }
 
 func DrawCmplxLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
-	if count >= len(pts) {
-		count = len(pts) - 1
+	if count > len(pts) {
+		count = len(pts)
 	}
 
 	gc.SetStrokeColor(palette.Palette[3])
 	// draw line through all points
-	p := coordsys.UnitToImgC(pts[0])
+	start := coordsys.UnitToImgC(pts[0])
+	p := start
 	gc.MoveTo(real(p), imag(p))
 	for i := 0; i < count; i++ {
 		p := coordsys.UnitToImgC(pts[i])
 		gc.LineTo(real(p), imag(p))
 	}
+
+	if count == len(pts) {
+		gc.LineTo(real(start), imag(start))
+	}
+
 	gc.Stroke()
 }
 
