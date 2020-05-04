@@ -19,7 +19,7 @@ import (
 
 type Epicycles struct {
 	C      []complex128 // fourier coefficients
-	sorted coeffs
+	sorted Coeffs
 	pts    []complex128
 
 	anim    *animation.Animation
@@ -28,24 +28,24 @@ type Epicycles struct {
 	palette color.Palette
 }
 
-type coefSort struct {
+type CoefSort struct {
 	idx  int
 	coef complex128
 }
 
-type coeffs []coefSort
+type Coeffs []CoefSort
 
 // Sort by coef magnitude, largest first
-func (a coeffs) Len() int           { return len(a) }
-func (a coeffs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a coeffs) Less(i, j int) bool { return cmplx.Abs(a[i].coef) > cmplx.Abs(a[j].coef) }
+func (a Coeffs) Len() int           { return len(a) }
+func (a Coeffs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a Coeffs) Less(i, j int) bool { return cmplx.Abs(a[i].coef) > cmplx.Abs(a[j].coef) }
 
 func New(coef []complex128, ptCount int) *Epicycles {
 	epi := &Epicycles{
 		C: coef,
 	}
 
-	epi.sorted = make(coeffs, len(coef))
+	epi.sorted = make(Coeffs, len(coef))
 	for i, c := range coef {
 		epi.sorted[i].idx = i
 		epi.sorted[i].coef = c
