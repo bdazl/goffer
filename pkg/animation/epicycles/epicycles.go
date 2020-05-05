@@ -29,8 +29,8 @@ type Epicycles struct {
 }
 
 type CoefSort struct {
-	idx  int
-	coef complex128
+	I int        // index
+	C complex128 // coefficient
 }
 
 type Coeffs []CoefSort
@@ -38,20 +38,14 @@ type Coeffs []CoefSort
 // Sort by coef magnitude, largest first
 func (a Coeffs) Len() int           { return len(a) }
 func (a Coeffs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a Coeffs) Less(i, j int) bool { return cmplx.Abs(a[i].coef) > cmplx.Abs(a[j].coef) }
+func (a Coeffs) Less(i, j int) bool { return cmplx.Abs(a[i].C) > cmplx.Abs(a[j].C) }
 
 func New(coef []complex128, ptCount int) *Epicycles {
 	epi := &Epicycles{
 		C: coef,
 	}
 
-	epi.sorted = make(Coeffs, len(coef))
-	for i, c := range coef {
-		epi.sorted[i].idx = i
-		epi.sorted[i].coef = c
-	}
-
-	sort.Sort(epi.sorted)
+	epi.sorted = MakeSorted(coef)
 
 	epi.pts = make([]complex128, ptCount)
 	lcf := float64(ptCount)
@@ -110,6 +104,17 @@ func (e *Epicycles) Frame(t float64) image.Image {
 	return e.currImg
 }
 
+func MakeSorted(C []complex128) Coeffs {
+	sorted := make(Coeffs, len(C))
+	for i, c := range C {
+		sorted[i].I = i
+		sorted[i].C = c
+	}
+
+	sort.Sort(sorted)
+	return sorted
+}
+
 func DrawCmplxLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
 	if count > len(pts) {
 		count = len(pts)
@@ -142,10 +147,10 @@ func (se Epicycles) DrawEpiCircles(gc *draw2dimg.GraphicContext, t float64, coun
 	center := complex(0, 0)
 	for i := 0; i < count; i++ {
 		srt := se.sorted[i]
-		p := fourier.Pat(t, se.C, srt.idx)
+		p := fourier.Pat(t, se.C, srt.I)
 
 		// don't draw the static one
-		if srt.idx != h {
+		if srt.I != h {
 			DrawCCirc(gc, center, p)
 		}
 
@@ -155,9 +160,9 @@ func (se Epicycles) DrawEpiCircles(gc *draw2dimg.GraphicContext, t float64, coun
 	center = complex(0, 0)
 	for i := 0; i < count; i++ {
 		srt := se.sorted[i]
-		p := fourier.Pat(t, se.C, srt.idx)
+		p := fourier.Pat(t, se.C, srt.I)
 
-		if srt.idx != h {
+		if srt.I != h {
 			DrawCLine(gc, center, p)
 		}
 
