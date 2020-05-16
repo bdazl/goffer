@@ -1,6 +1,8 @@
 package cmplx
 
 import (
+	"math/rand"
+
 	"gonum.org/v1/gonum/integrate"
 	"gonum.org/v1/gonum/spatial/r2"
 )
@@ -40,4 +42,42 @@ func Integrate(a, b float64, c []complex128) complex128 {
 	}
 
 	return complex(integrate.Trapezoidal(x, u), integrate.Trapezoidal(x, v))
+}
+
+func RandomSlice(count int, h float64) []complex128 {
+	hh := h / 2.0
+	out := make([]complex128, count)
+	for i := range out {
+		a, b := rand.Float64(), rand.Float64()
+		out[i] = complex(a*h-hh, b*h-hh)
+	}
+	return out
+}
+
+func Scale(dst []complex128, s complex128) {
+	for i := range dst {
+		dst[i] *= s
+	}
+}
+
+// dst = dst + src
+func Add(dst, src []complex128) {
+	if len(dst) != len(src) {
+		panic("bad lengths")
+	}
+
+	for i := range dst {
+		dst[i] += src[i]
+	}
+}
+
+// dst = dst - src
+func Sub(dst, src []complex128) {
+	if len(dst) != len(src) {
+		panic("bad lengths")
+	}
+
+	for i := range dst {
+		dst[i] -= src[i]
+	}
 }

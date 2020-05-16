@@ -3,6 +3,7 @@ package image
 import (
 	"image"
 
+	"github.com/HexHacks/goffer/pkg/coordsys"
 	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/palette"
 
@@ -20,4 +21,47 @@ func New() (*image.RGBA, *draw2dimg.GraphicContext) {
 	gc.SetLineWidth(2)
 
 	return img, gc
+}
+
+// Closed as in, if count is len(pts) then also close the curve
+func DrawClosedLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
+	if count > len(pts) {
+		count = len(pts)
+	}
+
+	// draw line through all points
+	start := coordsys.UnitToImgC(pts[0])
+	p := start
+	gc.MoveTo(real(p), imag(p))
+	for i := 0; i < count; i++ {
+		p := coordsys.UnitToImgC(pts[i])
+		gc.LineTo(real(p), imag(p))
+	}
+
+	if count == len(pts) {
+		gc.LineTo(real(start), imag(start))
+	}
+
+	gc.Stroke()
+}
+
+func DrawLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
+	if len(pts) < 1 {
+		return
+	}
+
+	if count > len(pts) {
+		count = len(pts)
+	}
+
+	// draw line through all points
+	start := coordsys.UnitToImgC(pts[0])
+	p := start
+	gc.MoveTo(real(p), imag(p))
+	for i := 0; i < count; i++ {
+		p := coordsys.UnitToImgC(pts[i])
+		gc.LineTo(real(p), imag(p))
+	}
+
+	gc.Stroke()
 }
