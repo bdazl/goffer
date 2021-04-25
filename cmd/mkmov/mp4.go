@@ -36,7 +36,6 @@ func mp4OutputFile(filename string, imgs []image.Image) {
 
 		fil, err := os.Create(fileName)
 		panicOn(err)
-		defer fil.Close()
 
 		err = png.Encode(fil, img)
 		panicOn(err)
@@ -46,6 +45,7 @@ func mp4OutputFile(filename string, imgs []image.Image) {
 		times[i] = ms
 
 		fmt.Printf("encoded: %v, time: %.2f\n", fileName, ms)
+		panicOn(fil.Close())
 	}
 
 	fmt.Printf("png enc stats; ")
