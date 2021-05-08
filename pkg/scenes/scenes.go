@@ -15,11 +15,12 @@ var (
 		"diffeq":      NewDiffEq(),
 		"svgepicycle": &SvgEpicycle{},
 		"epiopti":     &EpiOpti{},
+		"epismooth":   &EpiSmooth{},
 	}
 )
 
 func LastScene() string {
-	return "epiopti"
+	return "epismooth"
 }
 
 type Scene interface {
