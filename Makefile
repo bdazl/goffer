@@ -13,7 +13,7 @@ diffeq:
 	go run ./cmd/mkmov -backup -proj diffeq -fcount 300
 
 fulkonstett:
-	go run ./cmd/mkmov -proj fulkonstett -fcount 1 -preview
+	go run ./cmd/mkmov -proj fulkonstett -fcount 1
 
 ptbend-sync: ptbend rsync
 imgimport-sync: imgimport rsync
