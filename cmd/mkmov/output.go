@@ -23,13 +23,11 @@ const (
 )
 
 func OutputFile(imgs []image.Image) {
-	filename := path.Join("out", ActiveProject+"."+string(OutputFileType))
-
 	switch OutputFileType {
 	case MP4:
-		mp4OutputFile(filename, imgs)
+		mp4OutputFile(imgs)
 	case GIF:
-		gifOutputFile(filename, imgs)
+		gifOutputFile(imgs)
 	default:
 		fmt.Printf("bad output file type")
 		os.Exit(1)
@@ -77,7 +75,8 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func gifOutputFile(filename string, imgs []image.Image) {
+func gifOutputFile(imgs []image.Image) {
+	filename := videoOutFilename()
 	if Backup {
 		backupOld(filename)
 	}
