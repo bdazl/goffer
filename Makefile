@@ -3,15 +3,18 @@
 rsync:
 	rsync -av out/ ~/Dropbox/genart/goffer
 
-_ptbend:
+ptbend:
 	go run ./cmd/mkmov -backup -proj ptbend0 -fcount 990
 
-_imgimport:
+imgimport:
 	go run ./cmd/mkmov -backup -proj imgimport -fcount 160
 
-_diffeq:
+diffeq:
 	go run ./cmd/mkmov -backup -proj diffeq -fcount 300
 
-ptbend: _ptbend rsync
-imgimport: _imgimport rsync
-diffeq: _diffeq rsync
+fulkonstett:
+	go run ./cmd/mkmov -proj fulkonstett -fcount 1 -preview
+
+ptbend-sync: ptbend rsync
+imgimport-sync: imgimport rsync
+diffeq-sync: diffeq rsync
