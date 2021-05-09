@@ -19,13 +19,17 @@ import (
 	"github.com/HexHacks/goffer/pkg/global"
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
+	"github.com/HexHacks/goffer/pkg/math/float"
 
 	"github.com/lucasb-eyer/go-colorful"
 )
 
 const (
-	bpm       = 100
-	tempoFreq = bpm / 60
+	// Real value
+	// bpm = 100.0
+	bpm         = 100.0
+	tempoFreq   = bpm / 60.0
+	tempoPeriod = 60.0 / bpm
 
 	cutoutCnt    = 20
 	bezierPoints = 10
@@ -166,6 +170,48 @@ func (dj *Djanl) initStrokes() {
 func randPts(n int) []complex128 {
 	out := make([]complex128, n)
 	for i := 0; i < n; i++ {
+		s := float64(i) / float64(n-1)
+		t := s * Dur
+
+		inp := math.Mod(t, tempoPeriod)
+
+		// Zero when not on beat
+		// One when on beat
+		f := beatFunc(inp)            // [0, 1)
+		zeroTFS := f * float64(W) / 4 // [0, W/4)
+
+		pt := image.Point{CX, CY}
+
+		out[i] = randComplexPTwoCircles(pt, zeroTFS, float64(CX))
+	}
+	return out
+}
+
+func beatFunc(t float64) float64 {
+	const (
+		T = tempoPeriod
+
+		a = 1
+		b = 0
+		c = 18
+
+		m = T
+
+		cmin = 18
+		cmax = 200
+	)
+	g := func(x float64) float64 {
+		return float.Gaussian(x, a, b, c)
+	}
+
+	m0 := math.Mod(t, m)
+	m1 := math.Mod(-t, m)
+	return g(m0) + g(m1)
+}
+
+func randPtsV0(n int) []complex128 {
+	out := make([]complex128, n)
+	for i := 0; i < n; i++ {
 		pt := image.Point{W, H}
 
 		out[i] = randComplexPoint(pt)
@@ -173,7 +219,8 @@ func randPts(n int) []complex128 {
 	return out
 }
 
-// DRAW -------------------
+// DRAW -----------------------------------------------------------------------------
+
 func (dj *Djanl) Frame(t float64) image.Image {
 	img, _ := jimage.New()
 
@@ -271,6 +318,9 @@ func (dj *Djanl) drawImageV0(img draw.Image) {
 	}
 }
 
+// ---------------- DRAW
+
+//  RefImg - -----------------------
 func (dj *Djanl) randRefImg() image.Image {
 	r0, r1 := rand.Int(), rand.Int()
 
@@ -282,6 +332,9 @@ func (dj *Djanl) refImgCount() int {
 	return len(dj.refImgs) * cutoutCnt
 }
 
+// ---------------------- RefImg
+
+// RANDOM -------------------
 func randPoint(max image.Point) image.Point {
 	r0, r1 := rand.Int(), rand.Int()
 	return image.Point{
@@ -296,6 +349,22 @@ func randComplexPoint(max image.Point) complex128 {
 		r0*float64(max.X),
 		r1*float64(max.Y),
 	)
+}
+
+func randComplexPTwoCircles(cnt image.Point, minR, maxR float64) complex128 {
+	a := randI(0, twoPi)
+	r := randI(minR, maxR)
+
+	return complex(
+		math.Cos(a)*r,
+		math.Sin(a)*r,
+	)
+}
+
+func randI(a, b float64) float64 {
+	r := rand.Float64()
+	atb := b - a
+	return a + (atb * r)
 }
 
 func drawFullSrc(dst draw.Image, src image.Image, dp image.Point) {
