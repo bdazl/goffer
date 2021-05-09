@@ -17,11 +17,12 @@ var (
 		"svgepicycle": &SvgEpicycle{},
 		"epiopti":     &EpiOpti{},
 		"epismooth":   &EpiSmooth{},
+		"djanl":       &Djanl{},
 	}
 )
 
 func LastScene() string {
-	return "epismooth"
+	return "djanl"
 }
 
 type Scene interface {
