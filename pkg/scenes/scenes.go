@@ -6,6 +6,7 @@ import (
 
 var (
 	Scenes = map[string]Scene{
+		"template":    &Template{},
 		"fulkonstett": &frameFulkonstOne{},
 		"fulkonsttvå": &frameFulkonstTwo{},
 		"circ0":       &OnCircle0{},
