@@ -1,5 +1,7 @@
 package scenes
 
+// Made 2021-05-08
+
 import (
 	"fmt"
 	"image"
@@ -177,6 +179,7 @@ func (dj *Djanl) Frame(t float64) image.Image {
 		}
 	}
 
+	// Cirklar ifyllda slumpmässiga portioner av styckade referensbilder
 	/*cp := cutoutR.Max.Div(2)
 	mask := &mask.Circle{P: cp, R: cp.X}
 	for i := 0; i < dj.refImgCount(); i++ {
