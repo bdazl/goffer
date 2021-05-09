@@ -30,6 +30,8 @@ func main() {
 	start := time.Now()
 
 	flag.IntVar(&global.FPS, "fps", global.FPS, "frames per second")
+	flag.IntVar(&global.Width, "w", global.Width, "width")
+	flag.IntVar(&global.Height, "h", global.Height, "height")
 	flag.IntVar(&global.FrameCount, "fcount", global.FrameCount, "frame count")
 	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
 	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
