@@ -19,6 +19,16 @@ import (
 	"github.com/HexHacks/goffer/pkg/global"
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
+
+	"github.com/lucasb-eyer/go-colorful"
+)
+
+const (
+	bpm       = 100
+	tempoFreq = bpm / 60
+
+	cutoutCnt    = 20
+	bezierPoints = 10
 )
 
 var (
@@ -27,18 +37,19 @@ var (
 	CX = W / 2
 	CY = H / 2
 	//(C  = image.Point{CX, CY}
+	Dur = global.Total
 
 	blue        = color.RGBA{0, 0, 255, 255}
 	red         = color.RGBA{220, 10, 10, 255}
 	uniformBlue = &image.Uniform{blue}
 
-	cutoutCnt = 20
-	cutoutR   = image.Rect(0, 0, 50, 50)
+	cutoutR = image.Rect(0, 0, 100, 100)
 
 	twoPi = math.Pi * 2.0
 )
 
 type Djanl struct {
+	palette []colorful.Color
 	refImgs []refImage
 	strokes []stroke
 }
@@ -54,6 +65,7 @@ func resetGlobals() {
 	CX = W / 2
 	CY = H / 2
 
+	Dur = global.Total
 	uniformBlue = &image.Uniform{blue}
 }
 
@@ -122,6 +134,11 @@ func (b *brush) Draw(onto draw.Image, dp image.Point) {
 func (dj *Djanl) Init() {
 	resetGlobals()
 
+	palette, err := colorful.HappyPalette(4)
+	panicOn(err)
+
+	dj.palette = palette
+
 	dj.initRefImages()
 	dj.initStrokes()
 }
@@ -141,7 +158,7 @@ func (dj *Djanl) initStrokes() {
 	dj.strokes = make([]stroke, count)
 	for i := 0; i < count; i++ {
 		ref := dj.randRefImg()
-		pts := randPts(5)
+		pts := randPts(bezierPoints)
 		dj.strokes[i] = newStroke(ref, pts)
 	}
 }
@@ -160,36 +177,98 @@ func randPts(n int) []complex128 {
 func (dj *Djanl) Frame(t float64) image.Image {
 	img, _ := jimage.New()
 
-	// Background: Transparent
-	draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
+	/* bg */
+	bg := dj.palette[0]
+
+	// Background
+	// draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
+	draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
+
+	dj.drawAnimV0(img, t)
+	//dj.drawImageV2(img)
+	//dj.drawImageV1(img)
+	//dj.drawImageV0(img)
+
+	return img
+}
+
+func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
+	const (
+		// section length
+		secL = 0.1
+	)
+
+	var (
+		t    = tNominal / Dur
+		tFut = 1.0 - t
+	)
+
+	// Compensation for start
+	var fl float64 = 0
+	if t < secL {
+		fl = secL - t
+	}
+
+	// Compensation for end
+	var fr float64 = 0
+	if tFut < secL {
+		fr = secL - tFut
+	}
+
+	ll := t - secL + fl
+	lr := t + secL - fr
 
 	scnt := 100
 	for _, s := range dj.strokes {
 		for i := 0; i < scnt; i++ {
 			ti := float64(i) / float64(scnt-1)
-			a := ti * twoPi
+			curveT := (lr-ll)*ti + ll
 
-			r := float64(s.mask.R) * 1.2
-			/*rot*/ _ = image.Point{
-				int(math.Cos(a) * r * 0.5),
-				int(math.Sin(a) * r * 0.5),
-			}
-			// s.mask.P = s.defMaskP.Add(rot)
+			// radius
+			oR := s.brush.defMaskP.X / 2
+			s.mask.R = oR * i / (scnt - 1)
+
+			s.Draw(img, curveT)
+		}
+	}
+}
+
+func (dj *Djanl) drawImageV2(img draw.Image) {
+	// Ormar som växer
+	scnt := 100
+	for _, s := range dj.strokes {
+		for i := 0; i < scnt; i++ {
+			ti := float64(i) / float64(scnt-1)
+
+			// Radius
+			oR := s.brush.defMaskP.X / 2
+			s.mask.R = oR * i / (scnt - 1)
 			s.Draw(img, ti)
 		}
 	}
+}
 
+func (dj *Djanl) drawImageV1(img draw.Image) {
+	// Långa feta ormar
+	scnt := 100
+	for _, s := range dj.strokes {
+		for i := 0; i < scnt; i++ {
+			ti := float64(i) / float64(scnt-1)
+			s.Draw(img, ti)
+		}
+	}
+}
+
+func (dj *Djanl) drawImageV0(img draw.Image) {
 	// Cirklar ifyllda slumpmässiga portioner av styckade referensbilder
-	/*cp := cutoutR.Max.Div(2)
+	cp := cutoutR.Max.Div(2)
 	mask := &mask.Circle{P: cp, R: cp.X}
 	for i := 0; i < dj.refImgCount(); i++ {
 		ref := dj.randRefImg()
 
 		// drawFullSrc(img, ref, randPoint(img))
 		drawFullSrcMask(img, ref, mask, randPoint(img.Bounds().Max))
-	}*/
-
-	return img
+	}
 }
 
 func (dj *Djanl) randRefImg() image.Image {
@@ -264,4 +343,12 @@ func loadInputImages() []ImageSub {
 	}
 
 	return out
+}
+
+func PT(x, y int) image.Point {
+	return image.Point{x, y}
+}
+
+func PTs(n int) image.Point {
+	return image.Point{n, n}
 }
