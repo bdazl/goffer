@@ -30,8 +30,17 @@ func (dj *Djanl) Frame(t float64) image.Image {
 
 func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	/* bg */
+	const (
+		T4 = 0.1724137931034483
+		T5 = 0.20689655172413793
+		T6 = 0.24137931034482757
+		T7 = 0.27586206896551724
+
+		B4, B5, B6, B7 = T4 * 0.1, T5 * 0.1, T6 * .1, T7 * 0.1
+	)
 	var (
 		T    = t / MaxTime
+		TInv = 1.0 - T
 		pal1 = dj.palette[0]
 	)
 
@@ -50,11 +59,20 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 			rr, gg, bb := float64(r)/255.0, float64(g)/255.0, float64(b)/255.0
 
 			col := colorful.Color{R: rr, G: gg, B: bb}
-			mix := pal1
 
-			blend := col.BlendRgb(mix, T*0.1)
+			blend0 := col.BlendRgb(pal1, B4)
+			blend1 := col.BlendRgb(pal1, B5)
 
-			return blend
+			/*megbl := colorful.Color{
+				R: col.R - blend0.R,
+				G: col.G - blend0.G,
+				B: col.B - blend0.B,
+			}*/
+
+			out := col.BlendHsv(blend0, 0.5+0.5*TInv)
+			out = out.BlendHsv(blend1, 0.5+0.5*TInv)
+
+			return out
 		},
 	}
 	draw.Draw(img, img.Bounds(), filt, image.ZP, draw.Src)
