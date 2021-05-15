@@ -65,3 +65,24 @@ func DrawLines(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
 
 	gc.Stroke()
 }
+
+func DrawLinesImgCoords(gc *draw2dimg.GraphicContext, pts []complex128, count int) {
+	if len(pts) < 1 {
+		return
+	}
+
+	if count > len(pts) {
+		count = len(pts)
+	}
+
+	// draw line through all points
+	start := pts[0]
+	p := start
+	gc.MoveTo(real(p), imag(p))
+	for i := 0; i < count; i++ {
+		p := pts[i]
+		gc.LineTo(real(p), imag(p))
+	}
+
+	gc.Stroke()
+}
