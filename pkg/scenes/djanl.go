@@ -21,6 +21,7 @@ import (
 	"github.com/HexHacks/goffer/pkg/image/mask"
 	"github.com/HexHacks/goffer/pkg/math/float"
 
+	"github.com/llgcode/draw2d/draw2dimg"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -31,8 +32,7 @@ const (
 	tempoFreq   = bpm / 60.0
 	tempoPeriod = 60.0 / bpm
 
-	cutoutCnt    = 20
-	bezierPoints = 10
+	cutoutCnt = 20
 )
 
 var (
@@ -49,7 +49,9 @@ var (
 
 	cutoutR = image.Rect(0, 0, 100, 100)
 
-	twoPi = math.Pi * 2.0
+	//bezierPoints = int(math.Ceil(Dur)) * 2
+	bezierPoints = 300
+	twoPi        = math.Pi * 2.0
 )
 
 type Djanl struct {
@@ -70,7 +72,7 @@ func resetGlobals() {
 	CY = H / 2
 
 	Dur = global.Total
-	uniformBlue = &image.Uniform{blue}
+	//bezierPoints = int(math.Ceil(Dur)) * 2
 }
 
 type refImage struct {
@@ -168,21 +170,45 @@ func (dj *Djanl) initStrokes() {
 }
 
 func randPts(n int) []complex128 {
+	var (
+		start = randI(0, twoPi)
+		circs = []float64{
+			randI(10, 50),
+			randI(70, 150),
+			randI(100, 500),
+			randI(500, 800),
+			randI(810, 950),
+		}
+	)
+
+	prevcirc := rand.Int() % len(circs)
 	out := make([]complex128, n)
 	for i := 0; i < n; i++ {
 		s := float64(i) / float64(n-1)
-		t := s * Dur
 
-		inp := math.Mod(t, tempoPeriod)
+		t := s * Dur // [0, Dur)
 
 		// Zero when not on beat
 		// One when on beat
-		f := beatFunc(inp)            // [0, 1)
-		zeroTFS := f * float64(W) / 4 // [0, W/4)
+		f := beatFunc(t) // [0, 1)
 
-		pt := image.Point{CX, CY}
+		nextcirc := rand.Int() % len(circs)
+		c0, c1 := circs[prevcirc], circs[nextcirc]
+		cl := c1 - c0
 
-		out[i] = randComplexPTwoCircles(pt, zeroTFS, float64(CX))
+		a := start + randI(-0.2, 0.2) + s*twoPi //randI(math.Pi, twoPi)
+		r := c0 + f*cl                          //randI(0, 1000)
+
+		r = float.Clamp(r, 10.0, 950.0)
+		cnt := image.Point{CX, CY}
+
+		out[i] = cmplxCircle(cnt, a, r)
+
+		//w4 := float64(W) * 2.0 / 3.0 // * float64(i%2)
+		prevcirc = nextcirc
+
+		//out[i] = randComplexPTwoCircles(pt, zeroTFS, zeroTFS+20)
+		//fmt.Printf("s: %v, t: %v, f: %v\nout: %v\n", s, t, f, out[i])
 	}
 	return out
 }
@@ -193,7 +219,8 @@ func beatFunc(t float64) float64 {
 
 		a = 1
 		b = 0
-		c = 18
+		//c = 18
+		c = 20
 
 		m = T
 
@@ -206,7 +233,7 @@ func beatFunc(t float64) float64 {
 
 	m0 := math.Mod(t, m)
 	m1 := math.Mod(-t, m)
-	return g(m0) + g(m1)
+	return float.Clamp(g(m0)+g(m1), 0.0, 1.0)
 }
 
 func randPtsV0(n int) []complex128 {
@@ -222,21 +249,46 @@ func randPtsV0(n int) []complex128 {
 // DRAW -----------------------------------------------------------------------------
 
 func (dj *Djanl) Frame(t float64) image.Image {
-	img, _ := jimage.New()
+	img, gc := jimage.New()
+	_ = gc
 
 	/* bg */
 	bg := dj.palette[0]
+	_ = bg
 
 	// Background
-	// draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
+	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
 	draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
 
+	//dj.dbgDrawStroke(&dj.strokes[1], gc)
 	dj.drawAnimV0(img, t)
 	//dj.drawImageV2(img)
 	//dj.drawImageV1(img)
 	//dj.drawImageV0(img)
 
 	return img
+}
+
+func (dj *Djanl) dbgDrawStroke(s *stroke, gc *draw2dimg.GraphicContext) {
+	const (
+		samples = 1000
+	)
+
+	var (
+		fsampmax = float64(samples - 1)
+	)
+
+	gc.SetFillColor(dj.palette[2])
+	gc.SetStrokeColor(dj.palette[3])
+	gc.SetLineWidth(5)
+
+	pts := make([]complex128, samples)
+	for i := 0; i < samples; i++ {
+		t := float64(i) / fsampmax
+		pts[i] = s.curve.Point(t)
+	}
+
+	jimage.DrawLinesImgCoords(gc, pts, samples)
 }
 
 func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
@@ -250,26 +302,27 @@ func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
 		tFut = 1.0 - t
 	)
 
-	// Compensation for start
-	var fl float64 = 0
-	if t < secL {
-		fl = secL - t
+	compensation := func(thrshld float64) float64 {
+		if thrshld < secL {
+			return secL - thrshld
+		}
+		return 0.0
 	}
 
-	// Compensation for end
-	var fr float64 = 0
-	if tFut < secL {
-		fr = secL - tFut
-	}
+	fl := compensation(t) // compensate for when left <= len
+	fr := compensation(tFut)
 
-	ll := t - secL + fl
-	lr := t + secL - fr
+	ll := t - secL + fl // pt left of t
+	lr := t + secL - fr // pt right of t
+
+	L := lr - ll
 
 	scnt := 100
 	for _, s := range dj.strokes {
 		for i := 0; i < scnt; i++ {
 			ti := float64(i) / float64(scnt-1)
-			curveT := (lr-ll)*ti + ll
+
+			curveT := float.Clamp(ll+L*ti, 0.0, 1.0)
 
 			// radius
 			oR := s.brush.defMaskP.X / 2
@@ -351,14 +404,22 @@ func randComplexPoint(max image.Point) complex128 {
 	)
 }
 
-func randComplexPTwoCircles(cnt image.Point, minR, maxR float64) complex128 {
-	a := randI(0, twoPi)
-	r := randI(minR, maxR)
-
-	return complex(
+func cmplxCircle(cnt image.Point, a, r float64) complex128 {
+	circle := complex(
 		math.Cos(a)*r,
 		math.Sin(a)*r,
 	)
+
+	return PtoC(cnt) + circle
+}
+
+func lissajous(cnt image.Point, x, A, a, δ, B, b float64) complex128 {
+	lis := complex(
+		A*math.Sin(a*x+δ),
+		B*math.Sin(b*x),
+	)
+
+	return PtoC(cnt) + lis
 }
 
 func randI(a, b float64) float64 {
@@ -420,4 +481,8 @@ func PT(x, y int) image.Point {
 
 func PTs(n int) image.Point {
 	return image.Point{n, n}
+}
+
+func PtoC(p image.Point) complex128 {
+	return complex(float64(p.X), float64(p.Y))
 }
