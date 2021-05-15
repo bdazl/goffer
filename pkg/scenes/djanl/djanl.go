@@ -32,6 +32,8 @@ var (
 	//(C  = image.Point{CX, CY}
 	Dur = global.Total
 
+	MaxTime = float64(global.FrameCount-1) / float64(global.FPS)
+
 	blue        = color.RGBA{0, 0, 255, 255}
 	red         = color.RGBA{220, 10, 10, 255}
 	uniformBlue = &image.Uniform{blue}
@@ -42,6 +44,17 @@ var (
 	bezierPoints = 500
 	twoPi        = math.Pi * 2.0
 )
+
+func resetGlobals() {
+	W = global.Width
+	H = global.Height
+	CX = W / 2
+	CY = H / 2
+
+	Dur = global.Total
+	MaxTime = float64(global.FrameCount-1) / float64(global.FPS)
+	//bezierPoints = int(math.Ceil(Dur)) * 2
+}
 
 type Djanl struct {
 	palette []colorful.Color

@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/math/float"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -25,16 +24,6 @@ func (dj *Djanl) Init() {
 
 	dj.initRefImages()
 	dj.initStrokes()
-}
-
-func resetGlobals() {
-	W = global.Width
-	H = global.Height
-	CX = W / 2
-	CY = H / 2
-
-	Dur = global.Total
-	//bezierPoints = int(math.Ceil(Dur)) * 2
 }
 
 func (dj *Djanl) initRefImages() {

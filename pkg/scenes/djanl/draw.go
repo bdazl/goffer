@@ -1,27 +1,23 @@
 package djanl
 
 import (
+	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
 	"github.com/HexHacks/goffer/pkg/math/float"
 	"github.com/llgcode/draw2d/draw2dimg"
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 func (dj *Djanl) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	_ = gc
 
-	/* bg */
-	bg := dj.palette[0]
-	_ = bg
-
-	// Background
-	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
-	//draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
-	draw.Draw(img, img.Bounds(), dj.refImgs[0].img, image.ZP, draw.Src)
+	dj.drawBG(img, t)
 
 	//dj.dbgDrawStroke(&dj.strokes[1], gc)
 	dj.drawAnimV0(img, t)
@@ -30,6 +26,38 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	//dj.drawImageV0(img)
 
 	return img
+}
+
+func (dj *Djanl) drawBG(img draw.Image, t float64) {
+	/* bg */
+	var (
+		T    = t / MaxTime
+		pal1 = dj.palette[0]
+	)
+
+	fmt.Printf("T = %v\n", T)
+
+	// Background
+	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
+	//draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
+
+	//draw.Draw(img, img.Bounds(), dj.refImgs[0].img, image.ZP, draw.Src)
+	bg := dj.refImgs[0].img
+	filt := &jimage.Filter{
+		Img: bg,
+		FilterFunc: func(x, y int, inC color.Color) color.Color {
+			r, g, b, _ := inC.RGBA()
+			rr, gg, bb := float64(r)/255.0, float64(g)/255.0, float64(b)/255.0
+
+			col := colorful.Color{R: rr, G: gg, B: bb}
+			mix := pal1
+
+			blend := col.BlendRgb(mix, T*0.1)
+
+			return blend
+		},
+	}
+	draw.Draw(img, img.Bounds(), filt, image.ZP, draw.Src)
 }
 
 // DRAW -----------------------------------------------------------------------------
