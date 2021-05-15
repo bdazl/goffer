@@ -40,7 +40,7 @@ func cmplxCircle(cnt image.Point, a, r float64) complex128 {
 	return PtoC(cnt) + circle
 }
 
-func lissajous(cnt image.Point, x, A, a, δ, B, b float64) complex128 {
+func lissajous(cnt image.Point, x, A, B, a, b, δ float64) complex128 {
 	lis := complex(
 		A*math.Sin(a*x+δ),
 		B*math.Sin(b*x),
