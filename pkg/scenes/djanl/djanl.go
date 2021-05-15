@@ -39,7 +39,7 @@ var (
 	cutoutR = image.Rect(0, 0, 100, 100)
 
 	//bezierPoints = int(math.Ceil(Dur)) * 2
-	bezierPoints = 1000
+	bezierPoints = 500
 	twoPi        = math.Pi * 2.0
 )
 

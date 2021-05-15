@@ -73,25 +73,28 @@ func randPts(n int) []complex128 {
 	)
 
 	prevR := radStart
-	baseline := func(s, a, b float64) complex128 {
+	baseline := func(s, a, b, d float64) complex128 {
 		x := start + s*twoPi
 
 		rr, currR := radVariation(radi, prevR, s)
 		prevR = currR
-		return lissajous(cnt, x, rr, rr, a, b, piHalf)
+		return lissajous(cnt, x, rr, rr, a, b, d)
 	}
 
 	// Lissajous parameters
 	// x, A, B, a, b, δ
 	funcs := []ptFunc{
 		func(s float64) complex128 {
-			return baseline(s, 1, 1)
+			return baseline(s, 1, 1, piHalf)
+		},
+		/*func(s float64) complex128 {
+			return baseline(s, 1, 1+s, piHalf)
+		},*/
+		func(s float64) complex128 {
+			return baseline(s, 1, 2, piHalf)
 		},
 		func(s float64) complex128 {
-			return baseline(s, 1, 1+s)
-		},
-		func(s float64) complex128 {
-			return baseline(s, 1, 2)
+			return baseline(s, 3, 2, piHalf)
 		},
 	}
 
@@ -101,7 +104,22 @@ func randPts(n int) []complex128 {
 		variations[i] = ptLoop(l, f)
 	}
 
-	return flattenPts(variations)
+	flat := flattenPts(variations)
+	return extend(flat, 50)
+}
+
+func extend(in []complex128, extra int) []complex128 {
+	var (
+		lin    = len(in)
+		lextra = lin + extra
+	)
+	out := make([]complex128, lextra)
+	copy(out, in)
+
+	for i := lin; i < lextra; i++ {
+		out[i] = in[lin-1]
+	}
+	return out
 }
 
 func randPtsV1(n int) []complex128 {
