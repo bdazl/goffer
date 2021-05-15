@@ -20,7 +20,8 @@ func (dj *Djanl) Frame(t float64) image.Image {
 
 	// Background
 	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
-	draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
+	//draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
+	draw.Draw(img, img.Bounds(), dj.refImgs[0].img, image.ZP, draw.Src)
 
 	//dj.dbgDrawStroke(&dj.strokes[1], gc)
 	dj.drawAnimV0(img, t)
