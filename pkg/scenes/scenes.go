@@ -2,6 +2,8 @@ package scenes
 
 import (
 	"image"
+
+	"github.com/HexHacks/goffer/pkg/scenes/djanl"
 )
 
 var (
@@ -17,7 +19,7 @@ var (
 		"svgepicycle": &SvgEpicycle{},
 		"epiopti":     &EpiOpti{},
 		"epismooth":   &EpiSmooth{},
-		"djanl":       &Djanl{},
+		"djanl":       &djanl.Djanl{},
 	}
 )
 

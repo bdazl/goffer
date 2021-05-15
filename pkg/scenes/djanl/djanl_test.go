@@ -1,4 +1,4 @@
-package scenes
+package djanl
 
 import (
 	"fmt"
