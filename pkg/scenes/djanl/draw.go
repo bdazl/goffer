@@ -50,7 +50,7 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	var (
 		T    = t / MaxTime
 		TInv = 1.0 - T
-		pal1 = dj.palette[0]
+		pal1 = dj.palette[1]
 	)
 
 	fmt.Printf("T = %v\n", T)
@@ -68,7 +68,7 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 			col := colorful.Color{R: rr, G: gg, B: bb}
 
 			blend0 := col.BlendRgb(pal1, B4)
-			blend1 := col.BlendRgb(pal1, B5)
+			//blend1 := col.BlendRgb(pal1, B5)
 
 			/*megbl := colorful.Color{
 				R: col.R - blend0.R,
@@ -76,20 +76,22 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 				B: col.B - blend0.B,
 			}*/
 
-			out := col.BlendHsv(blend0, 0.5+0.5*TInv)
-			out = out.BlendHsv(blend1, 0.5+0.5*TInv)
+			//out := col.BlendHsv(blend0, 0.5+0.5*TInv)
+			//out = out.BlendHsv(blend1, 0.5+0.5*TInv)
+			out := col.BlendRgb(blend0, 0.5+0.5*TInv)
 
 			return out
 		},
 	}
 
-	a := piFourth + (0.3*T - 0.15)
+	a := piFourth * T
 	r := 100.0
 	pt := image.Point{
 		X: int(r * math.Cos(a)),
 		Y: int(r * math.Sin(a)),
 	}
 	// pt = image.ZP
+	// inf := &jimage.Infinite{Image: filt}
 	draw.Draw(img, img.Bounds(), filt, pt, draw.Src)
 }
 

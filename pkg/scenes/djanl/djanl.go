@@ -21,7 +21,8 @@ const (
 	tempoFreq   = bpm / 60.0
 	tempoPeriod = 60.0 / bpm
 
-	cutoutCnt = 20
+	cutoutCnt    = 20
+	bezierPoints = 600
 
 	twoPi    = math.Pi * 2.0
 	piHalf   = math.Pi / 2.0
@@ -45,7 +46,6 @@ var (
 	cutoutR = image.Rect(0, 0, 100, 100)
 
 	//bezierPoints = int(math.Ceil(Dur)) * 2
-	bezierPoints = 500
 )
 
 func resetGlobals() {
