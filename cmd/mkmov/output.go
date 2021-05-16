@@ -22,12 +22,12 @@ const (
 	MP4 FileType = "mp4"
 )
 
-func OutputFile(imgs []image.Image) {
+func outputMov() {
 	switch OutputFileType {
 	case MP4:
-		mp4OutputFile(imgs)
+		mp4OutputFile()
 	case GIF:
-		gifOutputFile(imgs)
+		//gifOutputFile(imgs)
 	default:
 		fmt.Printf("bad output file type")
 		os.Exit(1)

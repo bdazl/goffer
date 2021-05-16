@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"os"
 	"os/exec"
 	"path"
@@ -12,7 +11,7 @@ import (
 	"github.com/HexHacks/goffer/pkg/global"
 )
 
-func mp4OutputFile(imgs []image.Image) {
+func mp4OutputFile() {
 	// mp4 is created by outputting images as .png files
 	// and letting ffmpeg take care of the rest
 
@@ -21,7 +20,7 @@ func mp4OutputFile(imgs []image.Image) {
 	outDir := projOutDirectory()
 	imgDir := imageDirectory()
 
-	pngOutputDir(imgDir, imgs)
+	//pngOutputMany(imgs)
 
 	outFile := path.Join(outDir, videoBaseFilename())
 	if Backup {

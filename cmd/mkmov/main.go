@@ -26,6 +26,8 @@ var (
 	OutputFileType = MP4
 )
 
+type ImageChan = chan image.Image
+
 func main() {
 	start := time.Now()
 
@@ -43,17 +45,28 @@ func main() {
 	P = scenes.Scenes[ActiveProject]
 	global.InitGlobals()
 
-	imgs := animate()
+	// image writer thread
+	imgCh := make(ImageChan, 3)
+	writerDone := make(chan bool, 0)
 
-	OutputFile(imgs)
+	go imageWriter(imgCh, writerDone)
+
+	animate(imgCh)
+
+	close(imgCh) // report done to imageWriter
+	b, ok := <-writerDone
+	if !b || !ok {
+		fmt.Errorf("image writer reported error\n")
+	}
+
+	outputMov()
 
 	progduration := time.Since(start)
 	fmt.Printf("the program runtime was %v\n", progduration)
 }
 
-func animate() []image.Image {
+func animate(ch ImageChan) {
 	t0 := time.Now()
-	out := make([]image.Image, global.FrameCount)
 	P.Init()
 	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
 
@@ -65,19 +78,32 @@ func animate() []image.Image {
 		t := float64(i) / ffps
 
 		start := time.Now()
-		out[i] = P.Frame(t)
+		img := P.Frame(t)
 		meas := time.Since(start)
+
+		// Send image to writer
+		ch <- img
 
 		ms := getMs(meas)
 		times[i] = ms
 
-		fmt.Printf("frame: %v, seek: %.3fs, build time: %.3fms\n", i, t, ms)
+		fmt.Printf("frame: %v, seek: %.2fs, build time: %.2fms\n", i, t, ms)
 	}
 
 	fmt.Printf("total build time: %v\n", time.Since(t1))
 	printStats(times)
+}
 
-	return out
+func imageWriter(imgCh ImageChan, done chan bool) {
+	i := 0
+	for img, ok := <-imgCh; ok; img, ok = <-imgCh {
+		outputPng(i, img)
+		fmt.Printf("wrote to %v.png\n", i)
+		i++
+	}
+
+	fmt.Println("image worker done")
+	done <- true
 }
 
 func getMs(dur time.Duration) float64 {
