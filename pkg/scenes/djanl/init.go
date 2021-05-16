@@ -3,7 +3,6 @@ package djanl
 import (
 	"fmt"
 	"image"
-	"math"
 	"math/rand"
 	"os"
 	"path"
@@ -48,10 +47,9 @@ func (dj *Djanl) initStrokes() {
 
 func randPts(n int) []complex128 {
 	var (
-		piHalf = math.Pi / 2.0
-		start  = randI(0, twoPi)
-		cnt    = image.Point{CX, CY}
-		radi   = []float64{
+		start = randI(0, twoPi)
+		cnt   = image.Point{CX, CY}
+		radi  = []float64{
 			//randI(10, 50),
 			//randI(70, 150),
 			//randI(100, 500),

@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math"
 
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
@@ -17,6 +18,7 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	_ = gc
 
+	//dj.drawSimpleBg(img)
 	dj.drawBG(img, t)
 
 	//dj.dbgDrawStroke(&dj.strokes[1], gc)
@@ -30,6 +32,8 @@ func (dj *Djanl) Frame(t float64) image.Image {
 
 func (dj *Djanl) drawSimpleBg(img draw.Image) {
 	pal1 := dj.palette[0]
+
+	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
 	draw.Draw(img, img.Bounds(), &image.Uniform{pal1}, image.ZP, draw.Src)
 }
 
@@ -52,9 +56,7 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	fmt.Printf("T = %v\n", T)
 
 	// Background
-	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
 	//draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
-
 	//draw.Draw(img, img.Bounds(), dj.refImgs[0].img, image.ZP, draw.Src)
 	bg := dj.refImgs[0].img
 	filt := &jimage.Filter{
@@ -80,7 +82,15 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 			return out
 		},
 	}
-	draw.Draw(img, img.Bounds(), filt, image.ZP, draw.Src)
+
+	a := piFourth + (0.3*T - 0.15)
+	r := 100.0
+	pt := image.Point{
+		X: int(r * math.Cos(a)),
+		Y: int(r * math.Sin(a)),
+	}
+	// pt = image.ZP
+	draw.Draw(img, img.Bounds(), filt, pt, draw.Src)
 }
 
 // DRAW -----------------------------------------------------------------------------

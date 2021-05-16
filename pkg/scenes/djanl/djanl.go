@@ -22,6 +22,10 @@ const (
 	tempoPeriod = 60.0 / bpm
 
 	cutoutCnt = 20
+
+	twoPi    = math.Pi * 2.0
+	piHalf   = math.Pi / 2.0
+	piFourth = math.Pi / 4.0
 )
 
 var (
@@ -42,7 +46,6 @@ var (
 
 	//bezierPoints = int(math.Ceil(Dur)) * 2
 	bezierPoints = 500
-	twoPi        = math.Pi * 2.0
 )
 
 func resetGlobals() {
