@@ -18,6 +18,7 @@ import (
 var (
 	Backup        = false
 	Verbose       = false
+	Parallel      = false
 	ActiveProject = scenes.LastScene()
 	P             = scenes.Scenes[ActiveProject]
 )
@@ -26,7 +27,12 @@ var (
 	OutputFileType = MP4
 )
 
-type ImageChan = chan image.Image
+type Frame struct {
+	Number int
+	image.Image
+}
+
+type ImageChan = chan Frame
 
 func main() {
 	start := time.Now()
@@ -38,6 +44,7 @@ func main() {
 	flag.BoolVar(&Backup, "backup", Backup, "if file exists, do backup")
 	flag.StringVar(&ActiveProject, "proj", ActiveProject, "active project")
 	flag.BoolVar(&Verbose, "verbose", Verbose, "more output, notably from ffmpeg")
+	flag.BoolVar(&Parallel, "parallel", Verbose, "frames computed in parallel (THREAD SAFETY)")
 	flag.Parse()
 
 	rand.Seed(19901231)
@@ -45,30 +52,95 @@ func main() {
 	P = scenes.Scenes[ActiveProject]
 	global.InitGlobals()
 
-	// image writer thread
-	imgCh := make(ImageChan, 3)
-	writerDone := make(chan bool, 0)
-
-	go imageWriter(imgCh, writerDone)
-
-	animate(imgCh)
-
-	close(imgCh) // report done to imageWriter
-	b, ok := <-writerDone
-	if !b || !ok {
-		fmt.Errorf("image writer reported error\n")
-	}
-
+	renderImages()
 	outputMov()
 
 	progduration := time.Since(start)
 	fmt.Printf("the program runtime was %v\n", progduration)
 }
 
-func animate(ch ImageChan) {
-	t0 := time.Now()
-	P.Init()
-	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
+func renderImages() {
+	// image writer thread
+	imgCh := make(ImageChan, 30)
+	writerDone := make(chan bool, 0)
+
+	go imageWriter(imgCh, writerDone)
+
+	initProject()
+
+	if Parallel {
+		renderAllParallel(imgCh)
+	} else {
+		renderAllSingle(imgCh)
+	}
+
+	close(imgCh) // report done to imageWriter
+	b, ok := <-writerDone
+	if !b || !ok {
+		fmt.Printf("image writer reported error\n")
+	}
+}
+
+func renderAllParallel(ch ImageChan) {
+	var (
+		workers = 8
+		dones   = make([]chan bool, workers)
+		fc      = global.FrameCount
+
+		// integer division (some frames might be left out)
+		wrkrFrameCount = fc / workers
+
+		// rounding error frames is up to last worker
+		slop = fc - wrkrFrameCount*workers
+	)
+
+	// bootup workers
+	for w := 0; w < workers; w++ {
+		dones[w] = make(chan bool, 0)
+		start := wrkrFrameCount * w
+
+		count := wrkrFrameCount
+		if w == workers-1 {
+			count += slop
+		}
+
+		fmt.Printf("bootup worker %v\n", w)
+		go renderRange(start, count, ch, dones[w])
+	}
+
+	// wait for workers
+	for i, done := range dones {
+		b, ok := <-done
+		if !b || !ok {
+			pnk := fmt.Sprintf("worker %v failed", i)
+			panic(pnk)
+		}
+	}
+}
+
+func renderRange(start, count int, ch ImageChan, done chan bool) {
+	ffps := float64(global.FPS)
+	for i := start; i < start+count; i++ {
+		t := float64(i) / ffps
+
+		start := time.Now()
+		img := P.Frame(t)
+		meas := time.Since(start)
+
+		// Send image to writer
+		ch <- Frame{
+			Image:  img,
+			Number: i,
+		}
+
+		ms := getMs(meas)
+		fmt.Printf("frame: %v, seek: %.2fs, build time: %.2fms\n", i, t, ms)
+	}
+
+	done <- true
+}
+
+func renderAllSingle(ch ImageChan) {
 
 	t1 := time.Now()
 	times := make([]float64, global.FrameCount)
@@ -82,7 +154,10 @@ func animate(ch ImageChan) {
 		meas := time.Since(start)
 
 		// Send image to writer
-		ch <- img
+		ch <- Frame{
+			Image:  img,
+			Number: i,
+		}
 
 		ms := getMs(meas)
 		times[i] = ms
@@ -95,15 +170,28 @@ func animate(ch ImageChan) {
 }
 
 func imageWriter(imgCh ImageChan, done chan bool) {
-	i := 0
-	for img, ok := <-imgCh; ok; img, ok = <-imgCh {
-		outputPng(i, img)
-		fmt.Printf("wrote to %v.png\n", i)
-		i++
+	var (
+		fc = float64(global.FrameCount)
+	)
+	defer fmt.Println("image worker done")
+
+	count := 0
+	for frame, ok := <-imgCh; ok; frame, ok = <-imgCh {
+		outputPng(frame.Number, frame.Image)
+
+		count++
+		progress := 100 * float64(count) / fc
+
+		fmt.Printf("%.2f%%: wrote to %v.png\n", progress, frame.Number)
 	}
 
-	fmt.Println("image worker done")
 	done <- true
+}
+
+func initProject() {
+	t0 := time.Now()
+	P.Init()
+	fmt.Printf("init time: %.3fms\n", getMs(time.Since(t0)))
 }
 
 func getMs(dur time.Duration) float64 {
