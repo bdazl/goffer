@@ -15,13 +15,19 @@ diffeq:
 fulkonstett:
 	go run ./cmd/mkmov -proj fulkonstett -fcount 1
 
-djanl:
+djanl-del:
+	rm -f out/djanl.d/imgs/*
+
+djanl: djanl-del
 	go run ./cmd/mkmov -parallel -fps 5 -fcount 20 -proj djanl -w 2048 -h 2048
 
-djanl-1:
+djanl-1: djanl-del
 	go run ./cmd/mkmov -fps 24 -fcount 1 -proj djanl -w 2048 -h 2048
 
-djanl-final:
+djanl-small: djanl-del
+	go run ./cmd/mkmov -fps 4 -fcount 4 -proj djanl -w 2048 -h 2048
+
+djanl-final: djanl-del
 	go run ./cmd/mkmov -parallel -verbose -fps 24 -fcount 1500 -proj djanl -w 2048 -h 2048
 
 ptbend-sync: ptbend rsync
