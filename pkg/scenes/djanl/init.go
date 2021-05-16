@@ -41,7 +41,10 @@ func (dj *Djanl) initStrokes() {
 	for i := 0; i < count; i++ {
 		ref := dj.randRefImg()
 		pts := randPts(bezierPoints)
-		dj.strokes[i] = newStroke(ref, pts)
+
+		norm, max := normalize(pts)
+
+		dj.strokes[i] = newStroke(ref, norm, max)
 	}
 }
 
