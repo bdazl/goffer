@@ -52,11 +52,14 @@ func randPts(n int) []complex128 {
 		start  = randI(0, twoPi)
 		cnt    = image.Point{CX, CY}
 		radi   = []float64{
-			randI(10, 50),
-			randI(70, 150),
-			randI(100, 500),
+			//randI(10, 50),
+			//randI(70, 150),
+			//randI(100, 500),
+			randI(350, 400),
+			randI(400, 500),
+			//
 			randI(600, 800),
-			randI(810, 1000),
+			randI(810, 950),
 		}
 		radStart = rand.Int() % len(radi)
 	)
@@ -67,7 +70,10 @@ func randPts(n int) []complex128 {
 
 		rr, currR := radVariation(radi, prevR, s)
 		prevR = currR
-		return lissajous(cnt, x, rr, rr, a, b, d)
+
+		r0, r1 := randI(-0.01, 0.01), randI(-0.01, 0.01)
+
+		return lissajous(cnt, x, rr+r0, rr+r1, a, b, d)
 	}
 
 	// Lissajous parameters
@@ -76,9 +82,6 @@ func randPts(n int) []complex128 {
 		func(s float64) complex128 {
 			return baseline(s, 1, 1, piHalf)
 		},
-		/*func(s float64) complex128 {
-			return baseline(s, 1, 1+s, piHalf)
-		},*/
 		func(s float64) complex128 {
 			return baseline(s, 1, 2, piHalf)
 		},
