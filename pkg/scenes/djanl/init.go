@@ -40,15 +40,30 @@ func (dj *Djanl) initStrokes() {
 	dj.strokes = make([]stroke, count)
 	for i := 0; i < count; i++ {
 		ref := dj.randRefImg()
-		pts := randPts(bezierPoints)
+		pts := randTrajPts(bezierPoints)
 
-		norm, max := normalize(pts)
-
-		dj.strokes[i] = newStroke(ref, norm, max)
+		//norm, max := normalize(pts)
+		dj.strokes[i] = newStroke(ref, pts) //norm, max)
 	}
 }
 
-func randPts(n int) []complex128 {
+func randBgPts() []complex128 {
+	var (
+		start = randI(0, twoPi)
+		cnt   = image.Point{CX, CY}
+	)
+
+	f := func(s float64) complex128 {
+		x := start + s*twoPi
+
+		rr := 400.0
+		return lissajous(cnt, x, rr, rr, 1, 2, piHalf)
+	}
+
+	return ptLoop(bezierPoints, f)
+}
+
+func randTrajPts(n int) []complex128 {
 	var (
 		start = randI(0, twoPi)
 		cnt   = image.Point{CX, CY}
@@ -63,6 +78,9 @@ func randPts(n int) []complex128 {
 			randI(810, 950),
 		}
 		radStart = rand.Int() % len(radi)
+
+		RR0 = 0.0 //randI(-0.1, 0.1)
+		RR1 = 0.0 //randI(-0.1, 0.1)
 	)
 
 	prevR := radStart
@@ -72,9 +90,7 @@ func randPts(n int) []complex128 {
 		rr, currR := radVariation(radi, prevR, s)
 		prevR = currR
 
-		r0, r1 := randI(-0.01, 0.01), randI(-0.01, 0.01)
-
-		return lissajous(cnt, x, rr+r0, rr+r1, a, b, d)
+		return lissajous(cnt, x, rr+RR0, rr+RR1, a, b, d)
 	}
 
 	// Lissajous parameters
@@ -84,7 +100,16 @@ func randPts(n int) []complex128 {
 			return baseline(s, 1, 1, piHalf)
 		},
 		func(s float64) complex128 {
+			return baseline(s, 1, 1, piHalf)
+		},
+		func(s float64) complex128 {
 			return baseline(s, 1, 2, piHalf)
+		},
+		func(s float64) complex128 {
+			return baseline(s, 1, 2, piHalf)
+		},
+		func(s float64) complex128 {
+			return baseline(s, 3, 2, piHalf)
 		},
 		func(s float64) complex128 {
 			return baseline(s, 3, 2, piHalf)
@@ -131,7 +156,7 @@ func extend(in []complex128, extra int) []complex128 {
 	return out
 }
 
-func randPtsV1(n int) []complex128 {
+func randTrajPtsV1(n int) []complex128 {
 	// Cirklar
 	var (
 		start = randI(0, twoPi)
@@ -172,7 +197,7 @@ func randPtsV1(n int) []complex128 {
 	return out
 }
 
-func randPtsV0(n int) []complex128 {
+func randTrajPtsV0(n int) []complex128 {
 	out := make([]complex128, n)
 	for i := 0; i < n; i++ {
 		pt := image.Point{W, H}
