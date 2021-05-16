@@ -129,7 +129,7 @@ func randPtsV1(n int) []complex128 {
 	for i := 0; i < n; i++ {
 		s := float64(i) / float64(n-1)
 
-		t := s * Dur // [0, Dur)
+		t := s * MaxTime // [0, Dur)
 
 		// Zero when not on beat
 		// One when on beat

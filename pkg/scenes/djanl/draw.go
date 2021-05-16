@@ -28,6 +28,11 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	return img
 }
 
+func (dj *Djanl) drawSimpleBg(img draw.Image) {
+	pal1 := dj.palette[0]
+	draw.Draw(img, img.Bounds(), &image.Uniform{pal1}, image.ZP, draw.Src)
+}
+
 func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	/* bg */
 	const (
@@ -87,7 +92,7 @@ func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
 	)
 
 	var (
-		t    = tNominal / Dur
+		t    = tNominal / MaxTime
 		tFut = 1.0 - t
 	)
 
@@ -106,7 +111,7 @@ func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
 
 	L := lr - ll
 
-	scnt := 100
+	scnt := 200
 	for _, s := range dj.strokes {
 		for i := 0; i < scnt; i++ {
 			ti := float64(i) / float64(scnt-1)

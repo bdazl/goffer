@@ -9,15 +9,16 @@ import (
 
 type brush struct {
 	img      image.Image
-	mask     mask.Circle
+	mask     *mask.SoftCircle
 	defMaskP image.Point
 }
 
 func newBrush(img image.Image) brush {
 	cp := cutoutR.Max.Div(2)
 	return brush{
-		img:      img,
-		mask:     mask.Circle{P: cp, R: cp.X},
+		img: img,
+		//mask:     &mask.Circle{P: cp, R: cp.X},
+		mask:     &mask.SoftCircle{P: cp, R: cp.X},
 		defMaskP: cp,
 	}
 }
@@ -32,5 +33,5 @@ func (b *brush) Draw(onto draw.Image, dp image.Point) {
 		X: dp.X - hx,
 		Y: dp.Y - hy,
 	}
-	drawFullSrcMask(onto, b.img, &b.mask, ndp)
+	drawFullSrcMask(onto, b.img, b.mask, ndp)
 }
