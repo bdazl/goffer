@@ -92,6 +92,22 @@ func randPts(n int) []complex128 {
 	variations := make([][]complex128, len(funcs))
 	for i, f := range funcs {
 		variations[i] = ptLoop(l, f)
+
+		// UGLY :(
+		if i == 0 {
+			// Add trail from center to first variation
+			c := complex(float64(CX), float64(CY))
+			//fst := variations[i][0]
+			cnt := l / 2
+			extra := make([]complex128, cnt)
+			for y := 0; y < cnt; y++ {
+				//s := float64(y) / float64(cnt-1)
+				//sc := complex(s, s)
+				extra[y] = c //c + sc*(fst-c)
+			}
+
+			variations[i] = append(extra, variations[i]...)
+		}
 	}
 
 	flat := flattenPts(variations)
