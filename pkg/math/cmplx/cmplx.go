@@ -81,3 +81,16 @@ func Sub(dst, src []complex128) {
 		dst[i] -= src[i]
 	}
 }
+
+func CenterOfMass(pts []complex128) complex128 {
+	accum := complex(0, 0)
+	for _, p := range pts {
+		accum += p
+	}
+
+	plen := float64(len(pts))
+	return complex(
+		real(accum)/plen,
+		imag(accum)/plen,
+	)
+}
