@@ -19,13 +19,16 @@ djanl-del:
 	rm -f out/djanl.d/imgs/*
 
 djanl: djanl-del
-	go run ./cmd/mkmov -parallel -fps 5 -fcount 20 -proj djanl -w 2048 -h 2048
+	go run ./cmd/mkmov -parallel -fps 6 -fcount 20 -proj djanl -w 2048 -h 2048
 
 djanl-1: djanl-del
 	go run ./cmd/mkmov -fps 24 -fcount 1 -proj djanl -w 2048 -h 2048
 
-djanl-small: djanl-del
-	go run ./cmd/mkmov -fps 4 -fcount 4 -proj djanl -w 2048 -h 2048
+djanl-short-fast: djanl-del
+	go run ./cmd/mkmov -parallel -verbose -fps 20 -fcount 80 -proj djanl -w 512 -h 512
+
+djanl-long-fast: djanl-del
+	go run ./cmd/mkmov -parallel -verbose -fps 20 -fcount 500 -proj djanl -w 512 -h 512
 
 djanl-final: djanl-del
 	go run ./cmd/mkmov -parallel -verbose -fps 24 -fcount 1500 -proj djanl -w 2048 -h 2048
