@@ -84,6 +84,13 @@ func PtoC(p image.Point) complex128 {
 	return complex(float64(p.X), float64(p.Y))
 }
 
+func CToP(p complex128) image.Point {
+	return image.Point{
+		X: int(real(p)),
+		Y: int(imag(p)),
+	}
+}
+
 func panicOn(err error) {
 	if err != nil {
 		panic(err)

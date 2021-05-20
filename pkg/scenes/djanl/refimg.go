@@ -12,8 +12,8 @@ type refImage struct {
 
 func newRefImg(img ImageSub) refImage {
 	var (
-		mx = cutoutR.Max.X
-		my = cutoutR.Max.Y
+		mx = cutout
+		my = cutout
 	)
 	cutouts := make([]image.Image, cutoutCnt)
 	for i := range cutouts {

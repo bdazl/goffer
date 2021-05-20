@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/HexHacks/goffer/pkg/bezier"
+	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/math/float"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -23,6 +25,7 @@ func (dj *Djanl) Init() {
 
 	dj.initRefImages()
 	dj.initStrokes()
+	dj.initBg()
 }
 
 func (dj *Djanl) initRefImages() {
@@ -47,20 +50,26 @@ func (dj *Djanl) initStrokes() {
 	}
 }
 
+func (dj *Djanl) initBg() {
+	pts := randBgPts()
+	dj.bgCurve = bezier.New(pts...)
+}
+
 func randBgPts() []complex128 {
 	var (
 		start = randI(0, twoPi)
 		cnt   = image.Point{CX, CY}
+		fcx   = float64(CX)
 	)
 
 	f := func(s float64) complex128 {
 		x := start + s*twoPi
 
-		rr := 400.0
+		rr := fcx / 2.0
 		return lissajous(cnt, x, rr, rr, 1, 2, piHalf)
 	}
 
-	return ptLoop(bezierPoints, f)
+	return ptLoop(5, f)
 }
 
 func randTrajPts(n int) []complex128 {
@@ -71,16 +80,16 @@ func randTrajPts(n int) []complex128 {
 			//randI(10, 50),
 			//randI(70, 150),
 			//randI(100, 500),
-			randI(350, 400),
-			randI(400, 500),
+			randI(350*correct*W, 400*correct*W),
+			randI(400*correct*W, 500*correct*W),
 			//
-			randI(600, 800),
-			randI(810, 950),
+			//randI(600, 800),
+			randI(850*correct*W, 950*correct*W),
 		}
 		radStart = rand.Int() % len(radi)
 
-		RR0 = 0.0 //randI(-0.1, 0.1)
-		RR1 = 0.0 //randI(-0.1, 0.1)
+		RR0 = randI(-0.1, 0.1)
+		RR1 = randI(-0.1, 0.1)
 	)
 
 	prevR := radStart
@@ -106,12 +115,6 @@ func randTrajPts(n int) []complex128 {
 			return baseline(s, 1, 2, piHalf)
 		},
 		func(s float64) complex128 {
-			return baseline(s, 1, 2, piHalf)
-		},
-		func(s float64) complex128 {
-			return baseline(s, 3, 2, piHalf)
-		},
-		func(s float64) complex128 {
 			return baseline(s, 3, 2, piHalf)
 		},
 	}
@@ -121,12 +124,15 @@ func randTrajPts(n int) []complex128 {
 	for i, f := range funcs {
 		variations[i] = ptLoop(l, f)
 
+		// com := cmplx.CenterOfMass(variations[i])
+		// fmt.Printf("CoM: %v\n", com)
+
 		// UGLY :(
 		if i == 0 {
 			// Add trail from center to first variation
 			c := complex(float64(CX), float64(CY))
 			//fst := variations[i][0]
-			cnt := l / 2
+			cnt := 20
 			extra := make([]complex128, cnt)
 			for y := 0; y < cnt; y++ {
 				//s := float64(y) / float64(cnt-1)
@@ -134,6 +140,7 @@ func randTrajPts(n int) []complex128 {
 				extra[y] = c //c + sc*(fst-c)
 			}
 
+			// extra comes first
 			variations[i] = append(extra, variations[i]...)
 		}
 	}
@@ -198,6 +205,11 @@ func randTrajPtsV1(n int) []complex128 {
 }
 
 func randTrajPtsV0(n int) []complex128 {
+	var (
+		W = global.Width
+		H = global.Height
+	)
+
 	out := make([]complex128, n)
 	for i := 0; i < n; i++ {
 		pt := image.Point{W, H}

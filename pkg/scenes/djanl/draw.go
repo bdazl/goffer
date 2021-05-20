@@ -1,11 +1,9 @@
 package djanl
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
-	"math"
 
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
@@ -53,7 +51,7 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 		pal1 = dj.palette[1]
 	)
 
-	fmt.Printf("T = %v\n", T)
+	// fmt.Printf("T = %v\n", T)
 
 	// Background
 	//draw.Draw(img, img.Bounds(), &image.Uniform{bg}, image.ZP, draw.Src)
@@ -84,12 +82,15 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 		},
 	}
 
-	a := piFourth * T
+	/*a := piFourth * T
 	r := 100.0
 	pt := image.Point{
 		X: int(r * math.Cos(a)),
 		Y: int(r * math.Sin(a)),
-	}
+	}*/
+	curve := dj.bgCurve.Point(T)
+	pt := CToP(curve)
+
 	// pt = image.ZP
 	// inf := &jimage.Infinite{Image: filt}
 	draw.Draw(img, img.Bounds(), filt, pt, draw.Src)
@@ -131,8 +132,9 @@ func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
 			curveT := float.Clamp(ll+L*ti, 0.0, 1.0)
 
 			// radius
-			oR := s.brush.defMaskP.X / 2
-			s.mask.R = oR * i / (scnt - 1)
+			maxR := W * correct * float64(s.brush.defMaskP.X) / 4.0
+			fr := maxR * (ti + 0.1)
+			s.SetR(int(fr))
 
 			s.Draw(img, curveT)
 		}
@@ -167,7 +169,7 @@ func (dj *Djanl) drawImageV1(img draw.Image) {
 
 func (dj *Djanl) drawImageV0(img draw.Image) {
 	// Cirklar ifyllda slumpmässiga portioner av styckade referensbilder
-	cp := cutoutR.Max.Div(2)
+	cp := image.Point{int(cutoutR), int(cutoutR)}
 	mask := &mask.Circle{P: cp, R: cp.X}
 	for i := 0; i < dj.refImgCount(); i++ {
 		ref := dj.randRefImg()
@@ -204,7 +206,6 @@ func drawFullSrc(dst draw.Image, src image.Image, dp image.Point) {
 	srcR := src.Bounds()
 	dstR := srcR.Sub(srcR.Min).Add(dp)
 
-	// Draw a red rectangle
 	draw.Draw(dst, dstR, src, srcR.Min, draw.Src)
 }
 
@@ -217,6 +218,5 @@ func drawFullSrcMask(
 	srcR := src.Bounds()
 	dstR := srcR.Sub(srcR.Min).Add(dp)
 
-	// Draw a red rectangle
 	draw.DrawMask(dst, dstR, src, srcR.Min, mask, image.ZP, draw.Over)
 }
