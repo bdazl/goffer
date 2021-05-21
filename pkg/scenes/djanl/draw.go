@@ -20,7 +20,8 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	dj.drawBG(img, t)
 
 	//dj.dbgDrawStroke(&dj.strokes[1], gc)
-	dj.drawAnimV0(img, t)
+	dj.drawAnimV1Spline(img, t)
+	//dj.drawAnimV0(img, t)
 	//dj.drawImageV2(img)
 	//dj.drawImageV1(img)
 	//dj.drawImageV0(img)
@@ -96,7 +97,47 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	draw.Draw(img, img.Bounds(), filt, pt, draw.Src)
 }
 
-// DRAW -----------------------------------------------------------------------------
+func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
+	const (
+		// section length
+		secL = 0.1
+	)
+
+	var (
+		t    = tNominal / MaxTime
+		tFut = 1.0 - t
+	)
+
+	compensation := func(thrshld float64) float64 {
+		if thrshld < secL {
+			return secL - thrshld
+		}
+		return 0.0
+	}
+
+	fl := compensation(t) // compensate for when left <= len
+	fr := compensation(tFut)
+
+	ll := t - secL + fl // pt left of t
+	lr := t + secL - fr // pt right of t
+
+	L := lr - ll
+
+	scnt := 200.0
+	for _, s := range dj.strokes {
+		pts := s.Range(ll, lr, L/scnt)
+		for _, pt := range pts {
+			//ti := float64(i) / float64(scnt-1)
+
+			// radius
+			//maxR := W * correct * float64(s.brush.defMaskP.X) / 4.0
+			//fr := maxR * (ti + 0.1)
+			s.SetR(Width / 512)
+
+			s.DrawAt(img, pt)
+		}
+	}
+}
 
 func (dj *Djanl) drawAnimV0(img draw.Image, tNominal float64) {
 	const (

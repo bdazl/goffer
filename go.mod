@@ -3,6 +3,7 @@ module github.com/HexHacks/goffer
 go 1.14
 
 require (
+	github.com/cnkei/gospline v0.0.0-20191204072713-842a72f86331
 	github.com/golang/geo v0.0.0-20210211234256-740aa86cb551
 	github.com/llgcode/draw2d v0.0.0-20210313082411-577c1ead272a
 	github.com/looplab/fsm v0.1.0
