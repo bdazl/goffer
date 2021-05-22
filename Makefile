@@ -27,6 +27,9 @@ djanl-1: djanl-del
 djanl-short-fast: djanl-del
 	go run ./cmd/mkmov -parallel -verbose -fps 20 -fcount 80 -proj djanl -w 512 -h 512
 
+djanl-short-nice: djanl-del
+	go run ./cmd/mkmov -parallel -verbose -fps 20 -fcount 80 -proj djanl -w 2048 -h 2048
+
 djanl-long-fast: djanl-del
 	go run ./cmd/mkmov -parallel -verbose -fps 20 -fcount 500 -proj djanl -w 512 -h 512
 
