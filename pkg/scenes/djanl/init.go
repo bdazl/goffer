@@ -77,6 +77,58 @@ func randTrajPts(n int) []complex128 {
 		start = randI(0, twoPi)
 		cnt   = image.Point{CX, CY}
 		radi  = []float64{
+			randI(850*correct*W, 950*correct*W),
+			randI(850*correct*W, 950*correct*W),
+		}
+		// AS = []float64{1, 3, 5}
+		// BS = []float64{2, 2, 3}
+		//radStart = rand.Int() % len(radi)
+
+		RR0 = randI(-5, 5)
+		RR1 = randI(-5, 5)
+		//RR2 = randI(-5, 5)
+		//RR3 = randI(-5, 5)
+	)
+
+	// prevR := radStart
+	baseline := func(s, a, b, d float64) complex128 {
+		x := start + s*twoPi
+
+		// rr, currR := radVariation(radi, prevR, s)
+		//prevR = currR
+		rr := radi[0]
+
+		return lissajous(cnt, x, rr+RR0, rr+RR1, a, b, d*s)
+	}
+
+	// Lissajous parameters
+	// x, A, B, a, b, δ
+	funcs := []ptFunc{
+		func(s float64) complex128 {
+			return baseline(s, 1, 2, piHalf)
+		},
+		func(s float64) complex128 {
+			return baseline(s, 3, 2, piHalf)
+		},
+		func(s float64) complex128 {
+			return baseline(s, 5, 3, piHalf)
+		},
+	}
+
+	l := n / len(funcs)
+	variations := make([][]complex128, len(funcs))
+	for i, f := range funcs {
+		variations[i] = ptLoop(l, f)
+	}
+
+	return flattenPts(variations)
+}
+
+func randTrajPtsV2(n int) []complex128 {
+	var (
+		start = randI(0, twoPi)
+		cnt   = image.Point{CX, CY}
+		radi  = []float64{
 			//randI(10, 50),
 			//randI(70, 150),
 			//randI(100, 500),

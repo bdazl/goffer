@@ -4,10 +4,12 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math/rand"
 
 	jimage "github.com/HexHacks/goffer/pkg/image"
 	"github.com/HexHacks/goffer/pkg/image/mask"
 	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/HexHacks/goffer/pkg/math/spline"
 	"github.com/llgcode/draw2d/draw2dimg"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -100,12 +102,18 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 	const (
 		// section length
-		secL = 0.1
+		LMax = 0.1
+		LMin = 0.001
 	)
 
 	var (
 		t    = tNominal / MaxTime
 		tFut = 1.0 - t
+
+		//freq = 3.0
+		//secA = math.Sin(t*twoPi*freq)*0.5 + 0.5
+		//secA = beatFunc(tNominal)
+		secL = LMax * 0.3 //secA*(LMax-LMin) + LMin
 	)
 
 	compensation := func(thrshld float64) float64 {
@@ -123,8 +131,11 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 
 	L := lr - ll
 
-	scnt := 200.0
+	scnt := 2000.0
 	for _, s := range dj.strokes {
+		/*if i != 0 { // dbg
+			continue
+		}*/
 		pts := s.Range(ll, lr, L/scnt)
 		for _, pt := range pts {
 			//ti := float64(i) / float64(scnt-1)
@@ -218,6 +229,21 @@ func (dj *Djanl) drawImageV0(img draw.Image) {
 		// drawFullSrc(img, ref, randPoint(img))
 		drawFullSrcMask(img, ref, mask, randPoint(img.Bounds().Max))
 	}
+}
+
+func (dj *Djanl) dbgDrawSpline(s *spline.Spline, gc *draw2dimg.GraphicContext) {
+	const (
+		samples = 1000.0
+	)
+
+	rcoli0 := rand.Int() % len(dj.palette)
+	rcoli1 := rand.Int() % len(dj.palette)
+	gc.SetFillColor(dj.palette[rcoli0])
+	gc.SetStrokeColor(dj.palette[rcoli1])
+	gc.SetLineWidth(3)
+
+	pts := s.Range(0, 1, 1.0/samples)
+	jimage.DrawLinesImgCoords(gc, pts, samples)
 }
 
 func (dj *Djanl) dbgDrawStroke(s *stroke, gc *draw2dimg.GraphicContext) {

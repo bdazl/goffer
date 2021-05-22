@@ -74,6 +74,10 @@ func resetGlobals() {
 
 	Dur = global.Total
 	MaxTime = float64(global.FrameCount-1) / float64(global.FPS)
+
+	if MaxTime <= 0.0 {
+		MaxTime = 1
+	}
 }
 
 type Djanl struct {
