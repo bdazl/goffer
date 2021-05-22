@@ -24,7 +24,7 @@ const (
 	tempoPeriod = 60.0 / bpm
 
 	cutoutCnt    = 15
-	bezierPoints = 1000
+	bezierPoints = 5000
 
 	twoPi    = math.Pi * 2.0
 	piHalf   = math.Pi / 2.0

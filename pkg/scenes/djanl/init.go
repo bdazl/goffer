@@ -10,7 +10,9 @@ import (
 	"github.com/HexHacks/goffer/pkg/bezier"
 	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/math/float"
+	jrand "github.com/HexHacks/goffer/pkg/math/rand"
 	"github.com/HexHacks/goffer/pkg/math/spline"
+	"github.com/cnkei/gospline"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -93,26 +95,34 @@ func randBgPtsV0() []complex128 {
 
 func randTrajPts(n int) []complex128 {
 	var (
-		start = randI(0, twoPi)
+		start = jrand.Normal() * 0.1 //randI(0, twoPi)
 
-		Rcentmod = CX / 4
+		Rcentmod = CX / 8
 		Rcentx   = (rand.Int() % Rcentmod) - (Rcentmod / 2)
 		Rcenty   = (rand.Int() % Rcentmod) - (Rcentmod / 2)
 
 		cnt = image.Point{CX + Rcentx, CY + Rcenty}
+
+		half = 1. / 2.
+		//thrd = 1. / 3.
+		//frth = 1. / 4.
 	)
 
 	var (
-		radi = []float64{
-			randI(850*correct*W, 950*correct*W),
-			randI(850*correct*W, 950*correct*W),
-		}
+		radi = randI(899*correct*W, 900*correct*W)
 
-		Araw = []float64{1, 1}
-		Braw = []float64{1, 2}
+		Araw = []float64{1, 1, 1, 1, 1, 1}
+		Braw = []float64{1, 1, 2, 2, half, half}
 
-		AS = spline.NewUnit(Araw)
-		BS = spline.NewUnit(Braw)
+		CAc = []float64{0.0, 0.1, 0.4, 0.41, 0.7, 1.0}
+		//GBc = GAc
+	)
+	var (
+		GAS = gospline.NewCubicSpline(CAc, Araw)
+		GBS = gospline.NewCubicSpline(CAc, Braw)
+
+		//AS = spline.NewUnit(Araw)
+		//BS = spline.NewUnit(Braw)
 		//radStart = rand.Int() % len(radi)
 
 		// Direction
@@ -122,20 +132,20 @@ func randTrajPts(n int) []complex128 {
 	)
 
 	var (
-		freq = 2.0
+		freq = 10.0
 	)
 	// prevR := radStart
 	baseline := func(s float64) complex128 {
 		x := start + s*twoPi*freq
 
-		// rr, currR := radVariation(radi, prevR, s)
-		//prevR = currR
-		rr := radi[0]
+		rr := radi
 
-		//a, b := 1., 2.
-		a, b := AS.At(s), BS.At(s)
+		//a, b := AS.At(s), BS.At(s)
+		a, b := GAS.At(s), GBS.At(s)
 
-		return lissajous(cnt, x*Rdirf, rr, rr, a, b, piHalf)
+		xd := x * Rdirf
+		_ = xd
+		return lissajous(cnt, x, rr, rr, a, b, piHalf)
 	}
 
 	pts := ptLoop(n, baseline)

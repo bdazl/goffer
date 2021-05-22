@@ -8,6 +8,22 @@ import (
 	"github.com/HexHacks/goffer/pkg/math/float"
 )
 
+func partialSegment(t, L float64) (float64, float64) {
+	compensation := func(thrshld float64) float64 {
+		if thrshld < L {
+			return L - thrshld
+		}
+		return 0.0
+	}
+
+	fl := compensation(t) // compensate for when left <= len
+	fr := compensation(1 - t)
+
+	ll := t - L + fl // pt left of t
+	lr := t + L - fr // pt right of t
+	return ll, lr
+}
+
 func rev(a []float64) []float64 {
 	l := len(a)
 	out := make([]float64, l)
@@ -56,6 +72,13 @@ func randComplexPoint(max image.Point) complex128 {
 	return complex(
 		r0*float64(max.X),
 		r1*float64(max.Y),
+	)
+}
+
+func randUnitNorm(a float64) complex128 {
+	return complex(
+		math.Cos(a),
+		math.Sin(a),
 	)
 }
 

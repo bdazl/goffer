@@ -18,8 +18,8 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	_ = gc
 
-	// dj.drawSimpleBg(img)
-	dj.drawBG(img, t)
+	dj.drawSimpleBg(img)
+	//dj.drawBG(img, t)
 
 	/*for _, s := range dj.strokes {
 		if rand.Int()%2 == 0 {
@@ -33,9 +33,10 @@ func (dj *Djanl) Frame(t float64) image.Image {
 
 func (dj *Djanl) drawSimpleBg(img draw.Image) {
 	pal1 := dj.palette[0]
+	_ = pal1
 
-	//draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
-	draw.Draw(img, img.Bounds(), &image.Uniform{pal1}, image.ZP, draw.Src)
+	draw.Draw(img, img.Bounds(), image.Transparent, image.ZP, draw.Src)
+	//draw.Draw(img, img.Bounds(), &image.Uniform{pal1}, image.ZP, draw.Src)
 }
 
 func (dj *Djanl) drawBG(img draw.Image, t float64) {
@@ -93,12 +94,17 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 	}*/
 
 	//curve := dj.bgSpline.At(T)
-	curve := dj.bgCurve.Point(T)
+	curve := dj.BGAt(T)
 	pt := CToP(curve)
 
 	// pt = image.ZP
 	// inf := &jimage.Infinite{Image: filt}
 	draw.Draw(img, img.Bounds(), filt, pt, draw.Src)
+}
+
+func (dj *Djanl) BGAt(u float64) complex128 {
+	//curve := dj.bgSpline.At(T)
+	return dj.bgCurve.Point(u)
 }
 
 func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
@@ -109,34 +115,20 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 	)
 
 	var (
-		t    = tNominal / MaxTime
-		tFut = 1.0 - t
+		t = tNominal / MaxTime
 
 		//freq = 3.0
 		//secA = math.Sin(t*twoPi*freq)*0.5 + 0.5
 		//secA = beatFunc(tNominal)
-		secL = LMax * 0.9 //secA*(LMax-LMin) + LMin
+		L = LMax * 0.9 //secA*(LMax-LMin) + LMin
 
 		//Wint = Width / 512
 	)
 
-	compensation := func(thrshld float64) float64 {
-		if thrshld < secL {
-			return secL - thrshld
-		}
-		return 0.0
-	}
-
-	fl := compensation(t) // compensate for when left <= len
-	fr := compensation(tFut)
-
-	ll := t - secL + fl // pt left of t
-	lr := t + secL - fr // pt right of t
-
-	L := lr - ll
+	ll, lr := partialSegment(t, L)
 
 	const (
-		p0, _, _ = 0.5, 0.2, 0.3
+		p0, _, _ = 0.7, 0.2, 0.3
 	)
 
 	scnt := 500.0
@@ -162,9 +154,7 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 			col := lgt.BlendRgb(drk, pf)
 
 			// Brushes
-			const (
-				brmax = 5
-			)
+			brmax := 5 * W / 512.0
 			brushR := pf * brmax
 			brush := newColBrush(col, int(brushR))
 
