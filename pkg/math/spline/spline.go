@@ -6,7 +6,6 @@ import (
 
 type Spline struct {
 	X, Y gospline.Spline
-	Pts  []complex128 // debug
 }
 
 func New(pts []complex128) Spline {
@@ -26,9 +25,8 @@ func New(pts []complex128) Spline {
 	}
 
 	return Spline{
-		X:   gospline.NewCubicSpline(C, X),
-		Y:   gospline.NewCubicSpline(C, Y),
-		Pts: pts,
+		X: gospline.NewCubicSpline(C, X),
+		Y: gospline.NewCubicSpline(C, Y),
 	}
 }
 
