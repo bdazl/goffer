@@ -10,7 +10,6 @@ import (
 	"github.com/HexHacks/goffer/pkg/bezier"
 	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/math/float"
-	jrand "github.com/HexHacks/goffer/pkg/math/rand"
 	"github.com/HexHacks/goffer/pkg/math/spline"
 	"github.com/cnkei/gospline"
 	"github.com/lucasb-eyer/go-colorful"
@@ -95,7 +94,7 @@ func randBgPtsV0() []complex128 {
 
 func randTrajPts(n int) []complex128 {
 	var (
-		start = jrand.Normal() * 0.1 //randI(0, twoPi)
+		//start = jrand.Normal() * 0.1 //randI(0, twoPi)
 
 		Rcentmod = CX / 8
 		Rcentx   = (rand.Int() % Rcentmod) - (Rcentmod / 2)
@@ -121,8 +120,13 @@ func randTrajPts(n int) []complex128 {
 		GAS = gospline.NewCubicSpline(CAc, Araw)
 		GBS = gospline.NewCubicSpline(CAc, Braw)
 
-		//AS = spline.NewUnit(Araw)
-		//BS = spline.NewUnit(Braw)
+		AS = spline.NewUnit(Araw)
+		BS = spline.NewUnit(Braw)
+
+		_ = GAS
+		_ = GBS
+		_ = AS
+		_ = BS
 		//radStart = rand.Int() % len(radi)
 
 		// Direction
@@ -136,7 +140,7 @@ func randTrajPts(n int) []complex128 {
 	)
 	// prevR := radStart
 	baseline := func(s float64) complex128 {
-		x := start + s*twoPi*freq
+		x := /*start +*/ s * twoPi * freq
 
 		rr := radi
 
@@ -145,7 +149,7 @@ func randTrajPts(n int) []complex128 {
 
 		xd := x * Rdirf
 		_ = xd
-		return lissajous(cnt, x, rr, rr, a, b, piHalf)
+		return lissajous(cnt, xd, rr, rr, a, b, piHalf)
 	}
 
 	pts := ptLoop(n, baseline)
