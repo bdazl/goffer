@@ -12,6 +12,7 @@ import (
 
 	"github.com/HexHacks/goffer/pkg/bezier"
 	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/HexHacks/goffer/pkg/math/spline"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -22,8 +23,8 @@ const (
 	tempoFreq   = bpm / 60.0
 	tempoPeriod = 60.0 / bpm
 
-	cutoutCnt    = 20
-	bezierPoints = 600
+	cutoutCnt    = 15
+	bezierPoints = 1000
 
 	twoPi    = math.Pi * 2.0
 	piHalf   = math.Pi / 2.0
@@ -35,6 +36,7 @@ const (
 	// because I was stupid and exported large images for a long time
 	// I need a conversion factor on some values
 	correct = 1.0 / 2048.0
+	base512 = 1.0 / 512.0
 )
 
 var (
@@ -81,10 +83,11 @@ func resetGlobals() {
 }
 
 type Djanl struct {
-	palette []colorful.Color
-	refImgs []refImage
-	strokes []stroke
-	bgCurve bezier.Curve
+	palette  []colorful.Color
+	refImgs  []refImage
+	strokes  []stroke
+	bgCurve  bezier.Curve
+	bgSpline spline.Spline
 }
 
 type ImageSub interface {

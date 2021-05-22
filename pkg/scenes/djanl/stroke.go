@@ -7,19 +7,33 @@ import (
 
 	"github.com/HexHacks/goffer/pkg/bezier"
 	"github.com/HexHacks/goffer/pkg/math/spline"
+	"github.com/lucasb-eyer/go-colorful"
+	"golang.org/x/exp/rand"
 )
 
 type stroke struct {
 	brush
 	spline spline.Spline
 	curve  bezier.Curve // obsolete?
+	light0 colorful.Color
+	dark0  colorful.Color
 }
 
 func newStroke(img image.Image, pts []complex128) stroke {
+	// Colors
+	lgt := colorful.HappyColor()
+	h, s, v := lgt.Hsv()
+
+	rh, rs := rand.Float64()*360.0, rand.Float64()*0.5-0.25
+
+	drkr := colorful.Hsv(h+rh, s*rs, v*0.5)
+
 	return stroke{
 		brush:  newBrush(img),
 		spline: spline.New(pts),
 		curve:  bezier.New(pts...),
+		light0: lgt,
+		dark0:  drkr,
 	}
 }
 

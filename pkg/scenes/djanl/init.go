@@ -54,9 +54,27 @@ func (dj *Djanl) initStrokes() {
 func (dj *Djanl) initBg() {
 	pts := randBgPts()
 	dj.bgCurve = bezier.New(pts...)
+	dj.bgSpline = spline.New(pts)
 }
 
 func randBgPts() []complex128 {
+	var (
+		start = randI(0, twoPi)
+		cnt   = image.Point{CX, CY}
+		fcx   = float64(CX)
+	)
+
+	f := func(s float64) complex128 {
+		x := start + s*piHalf
+
+		rr := fcx / 2.0
+		return lissajous(cnt, x, rr, rr, 1, 2, piHalf*0.5)
+	}
+
+	return ptLoop(5, f)
+}
+
+func randBgPtsV0() []complex128 {
 	var (
 		start = randI(0, twoPi)
 		cnt   = image.Point{CX, CY}
@@ -76,36 +94,54 @@ func randBgPts() []complex128 {
 func randTrajPts(n int) []complex128 {
 	var (
 		start = randI(0, twoPi)
-		cnt   = image.Point{CX, CY}
-		radi  = []float64{
+
+		Rcentmod = CX / 4
+		Rcentx   = (rand.Int() % Rcentmod) - (Rcentmod / 2)
+		Rcenty   = (rand.Int() % Rcentmod) - (Rcentmod / 2)
+
+		cnt = image.Point{CX + Rcentx, CY + Rcenty}
+	)
+
+	var (
+		radi = []float64{
 			randI(850*correct*W, 950*correct*W),
 			randI(850*correct*W, 950*correct*W),
 		}
 
-		AS = spline.NewUnit([]float64{1, 3, 5})
-		BS = spline.NewUnit([]float64{2, 2, 3})
+		Araw = []float64{1, 1}
+		Braw = []float64{1, 2}
+
+		AS = spline.NewUnit(Araw)
+		BS = spline.NewUnit(Braw)
 		//radStart = rand.Int() % len(radi)
 
-		RR0 = randI(-5, 5)
-		RR1 = randI(-5, 5)
-		//RR2 = randI(-5, 5)
-		//RR3 = randI(-5, 5)
+		// Direction
+		// { -1, 1 }
+		Rdir  = (rand.Int()%2)*2 - 1
+		Rdirf = float64(Rdir)
 	)
 
+	var (
+		freq = 2.0
+	)
 	// prevR := radStart
 	baseline := func(s float64) complex128 {
-		x := start + s*twoPi
+		x := start + s*twoPi*freq
 
 		// rr, currR := radVariation(radi, prevR, s)
 		//prevR = currR
 		rr := radi[0]
 
+		//a, b := 1., 2.
 		a, b := AS.At(s), BS.At(s)
 
-		return lissajous(cnt, x, rr+RR0, rr+RR1, a, b, piHalf)
+		return lissajous(cnt, x*Rdirf, rr, rr, a, b, piHalf)
 	}
 
-	return ptLoop(n, baseline)
+	pts := ptLoop(n, baseline)
+	return pts
+	//ptsr := append(pts, revc(pts)...)
+	//return append(ptsr, pts[:n/10]...)
 }
 
 func randTrajPtsV2(n int) []complex128 {
@@ -267,14 +303,6 @@ func ptLoop(n int, f func(float64) complex128) []complex128 {
 	for i := 0; i < n; i++ {
 		s := float64(i) / float64(n-1)
 		out[i] = f(s)
-	}
-	return out
-}
-
-func flattenPts(args [][]complex128) []complex128 {
-	out := make([]complex128, 0)
-	for _, lst := range args {
-		out = append(out, lst...)
 	}
 	return out
 }

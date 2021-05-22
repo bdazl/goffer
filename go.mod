@@ -13,7 +13,7 @@ require (
 	github.com/rustyoz/genericlexer v0.0.0-20190224115003-eb82fd2987bd // indirect
 	github.com/rustyoz/svg v0.0.0-20200324092435-1ce6eba67a99
 	github.com/stretchr/testify v1.5.1
-	golang.org/x/exp v0.0.0-20210514180818-737f94c0881e // indirect
+	golang.org/x/exp v0.0.0-20210514180818-737f94c0881e
 	golang.org/x/image v0.0.0-20210504121937-7319ad40d33e // indirect
 	golang.org/x/tools v0.1.1 // indirect
 	gonum.org/v1/gonum v0.9.1

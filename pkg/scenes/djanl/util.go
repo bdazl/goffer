@@ -8,6 +8,34 @@ import (
 	"github.com/HexHacks/goffer/pkg/math/float"
 )
 
+func rev(a []float64) []float64 {
+	l := len(a)
+	out := make([]float64, l)
+	for i, j := 0, l-1; i < l; i++ {
+		out[i] = a[j]
+		j--
+	}
+	return out
+}
+
+func revc(a []complex128) []complex128 {
+	l := len(a)
+	out := make([]complex128, l)
+	for i, j := 0, l-1; i < l; i++ {
+		out[i] = a[j]
+		j--
+	}
+	return out
+}
+
+func flattenPts(args [][]complex128) []complex128 {
+	out := make([]complex128, 0)
+	for _, lst := range args {
+		out = append(out, lst...)
+	}
+	return out
+}
+
 // random intervall
 func randI(a, b float64) float64 {
 	r := rand.Float64()

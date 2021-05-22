@@ -18,8 +18,8 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	_ = gc
 
-	dj.drawSimpleBg(img)
-	//dj.drawBG(img, t)
+	// dj.drawSimpleBg(img)
+	dj.drawBG(img, t)
 
 	/*for _, s := range dj.strokes {
 		if rand.Int()%2 == 0 {
@@ -91,6 +91,8 @@ func (dj *Djanl) drawBG(img draw.Image, t float64) {
 		X: int(r * math.Cos(a)),
 		Y: int(r * math.Sin(a)),
 	}*/
+
+	//curve := dj.bgSpline.At(T)
 	curve := dj.bgCurve.Point(T)
 	pt := CToP(curve)
 
@@ -113,10 +115,9 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 		//freq = 3.0
 		//secA = math.Sin(t*twoPi*freq)*0.5 + 0.5
 		//secA = beatFunc(tNominal)
-		secL = LMax * 0.3 //secA*(LMax-LMin) + LMin
+		secL = LMax * 0.9 //secA*(LMax-LMin) + LMin
 
-		Wint  = Width / 512
-		Pixel = float64(Wint)
+		//Wint = Width / 512
 	)
 
 	compensation := func(thrshld float64) float64 {
@@ -134,29 +135,48 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 
 	L := lr - ll
 
-	// Colors
-	lgt := colorful.HappyColor()
-	h, s, v := lgt.Hsv()
-	drkr := colorful.Hsv(h, s, v*0.1)
+	const (
+		p0, _, _ = 0.5, 0.2, 0.3
+	)
 
-	// Brushes
-	lgtb := newColBrush(lgt, Wint)
-	darkb := newColBrush(drkr, Wint)
-
-	scnt := 2000.0
+	scnt := 500.0
 	for _, s := range dj.strokes {
-		/*if i != 0 { // dbg
-			continue
-		}*/
+		lgt := s.light0
+		drk := s.dark0
+		//lightb := newColBrush(lgt, Wint)
+		//darkb := newColBrush(drk, Wint)
+
 		pts := s.Range(ll, lr, L/scnt)
-		for _, pt := range pts {
+		pmax := float64(len(pts) - 1)
+
+		for i, pt := range pts {
+			pf := float64(i) / pmax
+
+			rnd := rand.Float64()
+
+			if rnd < p0 {
+				continue
+			}
+
+			// Color
+			col := lgt.BlendRgb(drk, pf)
+
+			// Brushes
+			const (
+				brmax = 5
+			)
+			brushR := pf * brmax
+			brush := newColBrush(col, int(brushR))
+
 			//v := math.Sin(lr*twoPi)*
 			//lightb.SetR(
 
-			drkpt := CToP(pt)
-			lgtpt := CToP(pt + complex(Pixel, Pixel/2))
-			darkb.DrawColor(img, drkpt, drkr)
-			lgtb.DrawColor(img, lgtpt, lgt)
+			//drkpt := CToP(pt)
+			//lgtpt := CToP(pt + complex(Pixel, Pixel/2))
+			//darkb.DrawColor(img, drkpt, drk)
+			//lgtb.DrawColor(img, lgtpt, lgt)
+			pt := CToP(pt)
+			brush.DrawColor(img, pt, lgt)
 		}
 	}
 }
