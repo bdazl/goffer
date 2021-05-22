@@ -10,6 +10,7 @@ import (
 	"github.com/HexHacks/goffer/pkg/bezier"
 	"github.com/HexHacks/goffer/pkg/global"
 	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/HexHacks/goffer/pkg/math/spline"
 	"github.com/lucasb-eyer/go-colorful"
 )
 
@@ -80,8 +81,9 @@ func randTrajPts(n int) []complex128 {
 			randI(850*correct*W, 950*correct*W),
 			randI(850*correct*W, 950*correct*W),
 		}
-		// AS = []float64{1, 3, 5}
-		// BS = []float64{2, 2, 3}
+
+		AS = spline.NewUnit([]float64{1, 3, 5})
+		BS = spline.NewUnit([]float64{2, 2, 3})
 		//radStart = rand.Int() % len(radi)
 
 		RR0 = randI(-5, 5)
@@ -91,37 +93,19 @@ func randTrajPts(n int) []complex128 {
 	)
 
 	// prevR := radStart
-	baseline := func(s, a, b, d float64) complex128 {
+	baseline := func(s float64) complex128 {
 		x := start + s*twoPi
 
 		// rr, currR := radVariation(radi, prevR, s)
 		//prevR = currR
 		rr := radi[0]
 
-		return lissajous(cnt, x, rr+RR0, rr+RR1, a, b, d*s)
+		a, b := AS.At(s), BS.At(s)
+
+		return lissajous(cnt, x, rr+RR0, rr+RR1, a, b, piHalf)
 	}
 
-	// Lissajous parameters
-	// x, A, B, a, b, δ
-	funcs := []ptFunc{
-		func(s float64) complex128 {
-			return baseline(s, 1, 2, piHalf)
-		},
-		func(s float64) complex128 {
-			return baseline(s, 3, 2, piHalf)
-		},
-		func(s float64) complex128 {
-			return baseline(s, 5, 3, piHalf)
-		},
-	}
-
-	l := n / len(funcs)
-	variations := make([][]complex128, len(funcs))
-	for i, f := range funcs {
-		variations[i] = ptLoop(l, f)
-	}
-
-	return flattenPts(variations)
+	return ptLoop(n, baseline)
 }
 
 func randTrajPtsV2(n int) []complex128 {

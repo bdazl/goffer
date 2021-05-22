@@ -18,15 +18,15 @@ func (dj *Djanl) Frame(t float64) image.Image {
 	img, gc := jimage.New()
 	_ = gc
 
-	//dj.drawSimpleBg(img)
-	dj.drawBG(img, t)
+	dj.drawSimpleBg(img)
+	//dj.drawBG(img, t)
 
-	//dj.dbgDrawStroke(&dj.strokes[1], gc)
+	/*for _, s := range dj.strokes {
+		if rand.Int()%2 == 0 {
+			dj.dbgDrawSpline(&s.spline, gc)
+		}
+	}*/
 	dj.drawAnimV1Spline(img, t)
-	//dj.drawAnimV0(img, t)
-	//dj.drawImageV2(img)
-	//dj.drawImageV1(img)
-	//dj.drawImageV0(img)
 
 	return img
 }
@@ -114,6 +114,9 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 		//secA = math.Sin(t*twoPi*freq)*0.5 + 0.5
 		//secA = beatFunc(tNominal)
 		secL = LMax * 0.3 //secA*(LMax-LMin) + LMin
+
+		Wint  = Width / 512
+		Pixel = float64(Wint)
 	)
 
 	compensation := func(thrshld float64) float64 {
@@ -131,6 +134,15 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 
 	L := lr - ll
 
+	// Colors
+	lgt := colorful.HappyColor()
+	h, s, v := lgt.Hsv()
+	drkr := colorful.Hsv(h, s, v*0.1)
+
+	// Brushes
+	lgtb := newColBrush(lgt, Wint)
+	darkb := newColBrush(drkr, Wint)
+
 	scnt := 2000.0
 	for _, s := range dj.strokes {
 		/*if i != 0 { // dbg
@@ -138,14 +150,13 @@ func (dj *Djanl) drawAnimV1Spline(img draw.Image, tNominal float64) {
 		}*/
 		pts := s.Range(ll, lr, L/scnt)
 		for _, pt := range pts {
-			//ti := float64(i) / float64(scnt-1)
+			//v := math.Sin(lr*twoPi)*
+			//lightb.SetR(
 
-			// radius
-			//maxR := W * correct * float64(s.brush.defMaskP.X) / 4.0
-			//fr := maxR * (ti + 0.1)
-			s.SetR(Width / 512)
-
-			s.DrawAt(img, pt)
+			drkpt := CToP(pt)
+			lgtpt := CToP(pt + complex(Pixel, Pixel/2))
+			darkb.DrawColor(img, drkpt, drkr)
+			lgtb.DrawColor(img, lgtpt, lgt)
 		}
 	}
 }
