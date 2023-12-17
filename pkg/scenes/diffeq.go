@@ -39,7 +39,7 @@ func (pt *dEqPt) Update(t float64) bool {
 	// assume velocity is not for us to decide
 
 	// update position
-	pt.Pos = pt.Pos.Add(pt.Vel)
+	pt.Pos = r2.Add(pt.Pos, pt.Vel)
 	pp := coordsys.UnitToImg(pt.Pos)
 
 	// add to history of positions
@@ -115,7 +115,7 @@ func (f *dEqField) Update(t float64) {
 	f.t = t
 
 	for i := range f.Pts {
-		f.Pts[i].Vel = f.DtOperator(t, f.Pts[i].Pos).Scale(speed * global.DT)
+		f.Pts[i].Vel = r2.Scale(speed*global.DT, f.DtOperator(t, f.Pts[i].Pos))
 		mv := f.Pts[i].Update(t)
 		if !mv {
 			f.Pts[i].Pos = randV()

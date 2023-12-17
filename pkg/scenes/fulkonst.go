@@ -83,16 +83,18 @@ func (f *frameFulkonstTwo) Init() {
 			newNode := jgraph.NewFluidNode(jr2.ExpV(rand.Float64(), dist, prevP.X, prevP.Y),
 				jr2.ExpV(rand.Float64(), 2.0, 0.0, 0.0), // vel
 				func(t float64, fn *jgraph.FluidNode) {
-					var parent jgraph.Positioner
+					var (
+						e = f.Edges[fn.ID()]
 
-					e := f.Edges[fn.ID()]
-					parent = e.From().(jgraph.Positioner)
-					parentP := parent.Pos()
+						parent jgraph.Positioner = e.From().(jgraph.Positioner)
 
-					newPos := fn.Base.P.Add(fn.V)
+						parentP = parent.Pos()
+						newPos  = r2.Add(fn.Base.P, fn.V)
+						norm    = jr2.Normalize(r2.Sub(newPos, parentP))
+					)
 
 					// normalize lenght
-					fn.Base.P = parentP.Add(jr2.Normalize(newPos.Sub(parentP)).Scale(e.L))
+					fn.Base.P = r2.Add(parentP, r2.Scale(e.L, norm))
 				},
 			)
 			f.Graph.AddNode(newNode)

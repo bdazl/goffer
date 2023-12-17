@@ -47,11 +47,11 @@ func Angle(v r2.Vec) float64 {
 }
 
 func Length(a, b r2.Vec) float64 {
-	return Norm(b.Sub(a))
+	return Norm(r2.Sub(b, a))
 }
 
 func Normalize(a r2.Vec) r2.Vec {
-	return a.Scale(1.0 / Norm(a))
+	return r2.Scale(1.0/Norm(a), a)
 }
 
 func ToSpherical(rect r2.Vec) r2.Vec {

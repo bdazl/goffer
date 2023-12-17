@@ -4,17 +4,17 @@ go 1.14
 
 require (
 	github.com/cnkei/gospline v0.0.0-20191204072713-842a72f86331
-	github.com/golang/geo v0.0.0-20210211234256-740aa86cb551
-	github.com/llgcode/draw2d v0.0.0-20210313082411-577c1ead272a
-	github.com/looplab/fsm v0.1.0
+	github.com/go-latex/latex v0.0.0-20231108140139-5c1ce85aa4ea // indirect
+	github.com/golang/geo v0.0.0-20230421003525-6adc56603217
+	github.com/llgcode/draw2d v0.0.0-20231212091825-f55e0c776b44
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/mshafiee/mp4 v0.0.0-20180318080707-0ad720116a9c
-	github.com/rustyoz/Mtransform v0.0.0-20190224104252-60c8c35a3681 // indirect
-	github.com/rustyoz/genericlexer v0.0.0-20190224115003-eb82fd2987bd // indirect
-	github.com/rustyoz/svg v0.0.0-20200324092435-1ce6eba67a99
+	github.com/rs/zerolog v1.21.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.5.1
-	golang.org/x/exp v0.0.0-20210514180818-737f94c0881e
-	golang.org/x/image v0.0.0-20210504121937-7319ad40d33e // indirect
-	golang.org/x/tools v0.1.1 // indirect
-	gonum.org/v1/gonum v0.9.1
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.16.0 // indirect
+	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
+	golang.org/x/tools v0.16.1 // indirect
+	gonum.org/v1/gonum v0.14.0
+	gonum.org/v1/plot v0.14.0
 )
