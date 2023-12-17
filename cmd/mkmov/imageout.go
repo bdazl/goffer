@@ -34,6 +34,9 @@ func pngOutputMany(imgs []image.Image) {
 
 func outputPng(idx int, img image.Image) {
 	imgDir := imageDirectory()
+	err := os.MkdirAll(imgDir, 0775)
+	panicOn(err)
+
 	fileName := path.Join(imgDir, fmt.Sprintf("%v.png", idx))
 
 	fil, err := os.Create(fileName)
