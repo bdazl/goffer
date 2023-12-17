@@ -3,7 +3,7 @@ package scenes
 import (
 	"image"
 
-	"github.com/HexHacks/goffer/pkg/scenes/djanl"
+	"github.com/bdazl/goffer/pkg/scenes/djanl"
 )
 
 var (

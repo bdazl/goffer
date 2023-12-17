@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/cmplx"
 
-	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
+	jcmplx "github.com/bdazl/goffer/pkg/math/cmplx"
 )
 
 const (

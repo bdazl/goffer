@@ -7,9 +7,9 @@ import (
 	"math/cmplx"
 	"math/rand"
 
-	"github.com/HexHacks/goffer/pkg/animation/epicycles"
-	jmath "github.com/HexHacks/goffer/pkg/math"
-	"github.com/HexHacks/goffer/pkg/math/fourier"
+	"github.com/bdazl/goffer/pkg/animation/epicycles"
+	jmath "github.com/bdazl/goffer/pkg/math"
+	"github.com/bdazl/goffer/pkg/math/fourier"
 
 	"gonum.org/v1/gonum/optimize"
 )

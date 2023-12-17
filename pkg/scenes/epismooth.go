@@ -4,11 +4,11 @@ import (
 	"image"
 	"image/draw"
 
-	"github.com/HexHacks/goffer/pkg/animation"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
-	"github.com/HexHacks/goffer/pkg/math/fourier"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/animation"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	jcmplx "github.com/bdazl/goffer/pkg/math/cmplx"
+	"github.com/bdazl/goffer/pkg/math/fourier"
+	"github.com/bdazl/goffer/pkg/palette"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 )

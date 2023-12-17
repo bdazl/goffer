@@ -5,11 +5,11 @@ import (
 	"image"
 	"os"
 
-	"github.com/HexHacks/goffer/pkg/animation/epicycles"
-	"github.com/HexHacks/goffer/pkg/coordsys"
-	"github.com/HexHacks/goffer/pkg/math/fourier"
-	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
-	"github.com/HexHacks/goffer/pkg/svg"
+	"github.com/bdazl/goffer/pkg/animation/epicycles"
+	"github.com/bdazl/goffer/pkg/coordsys"
+	"github.com/bdazl/goffer/pkg/math/fourier"
+	jr2 "github.com/bdazl/goffer/pkg/math/r2"
+	"github.com/bdazl/goffer/pkg/svg"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 	"gonum.org/v1/gonum/spatial/r2"

@@ -7,10 +7,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/HexHacks/goffer/pkg/bezier"
-	"github.com/HexHacks/goffer/pkg/global"
-	"github.com/HexHacks/goffer/pkg/math/float"
-	"github.com/HexHacks/goffer/pkg/math/spline"
+	"github.com/bdazl/goffer/pkg/bezier"
+	"github.com/bdazl/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/math/spline"
 	"github.com/cnkei/gospline"
 	"github.com/lucasb-eyer/go-colorful"
 )

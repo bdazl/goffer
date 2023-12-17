@@ -3,7 +3,7 @@ package r2
 import (
 	"math"
 
-	jmath "github.com/HexHacks/goffer/pkg/math"
+	jmath "github.com/bdazl/goffer/pkg/math"
 
 	"gonum.org/v1/gonum/spatial/r2"
 )

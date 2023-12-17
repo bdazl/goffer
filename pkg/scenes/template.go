@@ -5,9 +5,9 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	"github.com/HexHacks/goffer/pkg/image/mask"
+	"github.com/bdazl/goffer/pkg/global"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	"github.com/bdazl/goffer/pkg/image/mask"
 )
 
 type Template struct {

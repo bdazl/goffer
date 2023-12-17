@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/HexHacks/goffer/pkg/bezier"
-	"github.com/HexHacks/goffer/pkg/math/spline"
+	"github.com/bdazl/goffer/pkg/bezier"
+	"github.com/bdazl/goffer/pkg/math/spline"
 	"github.com/lucasb-eyer/go-colorful"
 	"golang.org/x/exp/rand"
 )

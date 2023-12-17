@@ -1,4 +1,4 @@
-module github.com/HexHacks/goffer
+module github.com/bdazl/goffer
 
 go 1.14
 

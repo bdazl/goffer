@@ -6,11 +6,11 @@ import (
 	"image/color"
 	"math"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	"github.com/HexHacks/goffer/pkg/math/float"
-	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/global"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	"github.com/bdazl/goffer/pkg/math/float"
+	jr2 "github.com/bdazl/goffer/pkg/math/r2"
+	"github.com/bdazl/goffer/pkg/palette"
 
 	//"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/spatial/r2"

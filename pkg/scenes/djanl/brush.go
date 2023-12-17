@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/HexHacks/goffer/pkg/image/mask"
+	"github.com/bdazl/goffer/pkg/image/mask"
 )
 
 type brush struct {

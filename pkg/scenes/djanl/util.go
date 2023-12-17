@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/math/float"
 )
 
 func partialSegment(t, L float64) (float64, float64) {

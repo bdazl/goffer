@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	"github.com/HexHacks/goffer/pkg/scenes"
+	"github.com/bdazl/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/scenes"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/stat"

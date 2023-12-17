@@ -1,7 +1,7 @@
 package animation
 
 import (
-	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/global"
 )
 
 type Animator func(float64)

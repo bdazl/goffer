@@ -3,9 +3,9 @@ package image
 import (
 	"image"
 
-	"github.com/HexHacks/goffer/pkg/coordsys"
-	"github.com/HexHacks/goffer/pkg/global"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/coordsys"
+	"github.com/bdazl/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/palette"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 )

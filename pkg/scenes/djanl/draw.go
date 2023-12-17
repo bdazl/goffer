@@ -6,10 +6,10 @@ import (
 	"image/draw"
 	"math/rand"
 
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	"github.com/HexHacks/goffer/pkg/image/mask"
-	"github.com/HexHacks/goffer/pkg/math/float"
-	"github.com/HexHacks/goffer/pkg/math/spline"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	"github.com/bdazl/goffer/pkg/image/mask"
+	"github.com/bdazl/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/math/spline"
 	"github.com/llgcode/draw2d/draw2dimg"
 	"github.com/lucasb-eyer/go-colorful"
 )

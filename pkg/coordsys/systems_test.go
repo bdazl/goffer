@@ -3,7 +3,7 @@ package coordsys
 import (
 	"testing"
 
-	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/global"
 	"github.com/stretchr/testify/assert"
 	"gonum.org/v1/gonum/spatial/r2"
 )

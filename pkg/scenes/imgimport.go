@@ -8,10 +8,10 @@ import (
 	"math/cmplx"
 	"os"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	jcmplx "github.com/HexHacks/goffer/pkg/math/cmplx"
-	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/global"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	jcmplx "github.com/bdazl/goffer/pkg/math/cmplx"
+	"github.com/bdazl/goffer/pkg/math/float"
 )
 
 const (

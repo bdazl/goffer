@@ -5,12 +5,12 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jr2 "github.com/HexHacks/goffer/pkg/math/r2"
+	"github.com/bdazl/goffer/pkg/global"
+	jr2 "github.com/bdazl/goffer/pkg/math/r2"
 
-	jgraph "github.com/HexHacks/goffer/pkg/graph"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	jmath "github.com/HexHacks/goffer/pkg/math"
+	jgraph "github.com/bdazl/goffer/pkg/graph"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	jmath "github.com/bdazl/goffer/pkg/math"
 
 	kit "github.com/llgcode/draw2d/draw2dkit"
 

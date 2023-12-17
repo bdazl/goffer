@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	jmath "github.com/HexHacks/goffer/pkg/math"
+	jmath "github.com/bdazl/goffer/pkg/math"
 	"github.com/stretchr/testify/assert"
 )
 

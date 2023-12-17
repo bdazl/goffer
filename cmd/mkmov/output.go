@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/palette"
 )
 
 type FileType string

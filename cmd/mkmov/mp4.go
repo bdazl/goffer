@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/global"
 )
 
 func mp4OutputFile() {

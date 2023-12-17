@@ -4,11 +4,11 @@ import (
 	"image"
 	"math"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	jmath "github.com/HexHacks/goffer/pkg/math"
-	"github.com/HexHacks/goffer/pkg/math/float"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/global"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	jmath "github.com/bdazl/goffer/pkg/math"
+	"github.com/bdazl/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/palette"
 	"github.com/llgcode/draw2d"
 	//	"github.com/llgcode/draw2d"
 )

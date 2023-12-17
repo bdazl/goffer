@@ -4,7 +4,7 @@ import (
 	"image"
 	"image/color"
 
-	"github.com/HexHacks/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/math/float"
 )
 
 type SoftCircle struct {

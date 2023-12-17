@@ -7,11 +7,11 @@ import (
 	"math/cmplx"
 	"sort"
 
-	"github.com/HexHacks/goffer/pkg/animation"
-	"github.com/HexHacks/goffer/pkg/coordsys"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	"github.com/HexHacks/goffer/pkg/math/fourier"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/animation"
+	"github.com/bdazl/goffer/pkg/coordsys"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	"github.com/bdazl/goffer/pkg/math/fourier"
+	"github.com/bdazl/goffer/pkg/palette"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 	kit "github.com/llgcode/draw2d/draw2dkit"

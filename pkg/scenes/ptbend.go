@@ -7,10 +7,10 @@ import (
 	"math/cmplx"
 	"math/rand"
 
-	"github.com/HexHacks/goffer/pkg/global"
-	jimage "github.com/HexHacks/goffer/pkg/image"
-	"github.com/HexHacks/goffer/pkg/math/float"
-	"github.com/HexHacks/goffer/pkg/palette"
+	"github.com/bdazl/goffer/pkg/global"
+	jimage "github.com/bdazl/goffer/pkg/image"
+	"github.com/bdazl/goffer/pkg/math/float"
+	"github.com/bdazl/goffer/pkg/palette"
 
 	"github.com/llgcode/draw2d/draw2dimg"
 	kit "github.com/llgcode/draw2d/draw2dkit"

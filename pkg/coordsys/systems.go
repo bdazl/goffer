@@ -1,7 +1,7 @@
 package coordsys
 
 import (
-	"github.com/HexHacks/goffer/pkg/global"
+	"github.com/bdazl/goffer/pkg/global"
 	"gonum.org/v1/gonum/spatial/r2"
 )
 
